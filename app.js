@@ -4,12 +4,15 @@ const tag = 'store-api';
 // Requirements
 require('dotenv').config();
 const express = require('express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 const debug = require('debug')(tag);
 
 // App configuration
 const app = express();
 const port = process.env.PORT || 3000;
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(cors());
 
 // Connect to MongoDB and SMTP Server

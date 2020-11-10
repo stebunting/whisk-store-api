@@ -1,9 +1,9 @@
 // Page Tag
-const tag = 'store-api:productsController';
+// const tag = 'store-api:productsController';
 
 // Requirements
-const debug = require('debug')(tag);
-const { getProducts, getProductById } = require('../controllers/dbController')();
+// const debug = require('debug')(tag);
+const { getProducts, getProductById } = require('./dbController')();
 
 function productsController() {
   async function fetchProducts(req, res) {
@@ -26,7 +26,7 @@ function productsController() {
     return res.json({
       status: 'ok',
       product: product[0]
-    })
+    });
   }
 
   return {

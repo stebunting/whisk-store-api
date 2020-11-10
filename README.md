@@ -14,14 +14,20 @@ GET /api/products
 GET /api/product/:id
 ```
 
-## Update shopping cart
+## Create basket
 
 ```
-POST /api/shoppingcart
+POST /api/basket
 ```
 
-## Get shopping cart
+## Update basket
 
 ```
-GET /api/shoppingcart/:id
+PUT /api/basket/:id
+```
+
+## Get basket
+
+```
+GET /api/basket/:id
 ```

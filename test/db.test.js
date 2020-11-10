@@ -1,5 +1,5 @@
 // Page Tag
-const tag = 'store-api:db.test';
+// const tag = 'store-api:db.test';
 
 // Requirements
 const assert = require('assert').strict;
@@ -14,6 +14,7 @@ const {
   getProductById,
   numProducts,
   addBasket,
+  updateBasketById,
   getBasketById
 } = require('../src/controllers/dbController')();
 
@@ -23,7 +24,7 @@ describe('Database testing...', () => {
   before(async () => {
     await connect();
     assert(isConnected());
-  })
+  });
 
   after(() => {
     disconnect();
@@ -41,7 +42,7 @@ describe('Database testing...', () => {
     it('starts with empty db...', async () => {
       const response = await numProducts();
       assert.strictEqual(response, 0);
-    })
+    });
 
     it('successfully added...', async () => {
       const product = products[0];
@@ -62,7 +63,7 @@ describe('Database testing...', () => {
 
     it('gets all products', async () => {
       const product = products[0];
-      const addResponse = await addProduct(product);
+      await addProduct(product);
 
       const response = await getProducts();
       assert.strictEqual(response.length, 1);
@@ -97,6 +98,40 @@ describe('Database testing...', () => {
       const response = await getBasketById(id);
       assert.strictEqual(response.length, 1);
       assert.deepStrictEqual(response[0]._id, id);
+    });
+
+    it('successfully adds item to basket...', async () => {
+      const addResponse = await addBasket();
+      const { insertedId: id } = addResponse;
+
+      const updateResponse = await updateBasketById(id, 'abcdef123456', 3);
+      assert.strictEqual(updateResponse.modifiedCount, 1);
+
+      const getResponse = await getBasketById(id);
+      assert.strictEqual(getResponse.length, 1);
+      assert.strictEqual(getResponse[0].items.abcdef123456, 3);
+    });
+
+    it('successfully increments item already in basket...', async () => {
+      const addResponse = await addBasket();
+      const { insertedId: id } = addResponse;
+      await updateBasketById(id, 'abcdef123456', 3);
+      await updateBasketById(id, 'abcdef123456', 2);
+
+      const getResponse = await getBasketById(id);
+      assert.strictEqual(getResponse.length, 1);
+      assert.strictEqual(getResponse[0].items.abcdef123456, 5);
+    });
+
+    it('successfully decrements item already in basket...', async () => {
+      const addResponse = await addBasket();
+      const { insertedId: id } = addResponse;
+      await updateBasketById(id, 'abcdef123456', 8);
+      await updateBasketById(id, 'abcdef123456', -4);
+
+      const getResponse = await getBasketById(id);
+      assert.strictEqual(getResponse.length, 1);
+      assert.strictEqual(getResponse[0].items.abcdef123456, 4);
     });
   });
 });

@@ -104,6 +104,20 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
     });
   }
 
+  // Update Basket
+  function updateBasketById(id, productId, quantity) {
+    return new Promise((resolve, reject) => {
+      if (!isConnected()) {
+        return reject(new Error('Not connected to database'));
+      }
+      return db.collection('storeBaskets').updateOne(
+        { _id: ObjectId(id) },
+        { $inc: { [`items.${productId}`]: quantity } }
+      ).then((data) => resolve(data))
+        .catch((error) => reject(error));
+    });
+  }
+
   // Get Basket from DB
   function getBasketById(id) {
     return new Promise((resolve, reject) => {
@@ -128,6 +142,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
     getProductById,
     numProducts,
     addBasket,
+    updateBasketById,
     getBasketById
   };
 }

@@ -1,15 +1,40 @@
 // Page Tag
-// const tag = 'store-api:basketController';
+const tag = 'store-api:basketController';
 
 // Requirements
-// const debug = require('debug')(tag);
+const debug = require('debug')(tag);
 const { getBasketById, addBasket, updateBasketById } = require('./dbController')();
+const { getProductById } = require('./dbController')();
 
 function basketController() {
   // Method to get a basket
   async function getBasket(req, res) {
     const { id } = req.params;
-    const basket = await getBasketById(id);
+    let [basket] = await getBasketById(id);
+
+    if (basket.length < 1) {
+      return res.json({
+        status: 'error'
+      });
+    }
+
+    const response = await Promise.allSettled(
+      Object.keys(basket.items).map((key) => getProductById(key))
+    );
+    basket = {
+      basketId: basket._id,
+      items: response.map((item) => {
+        if (item.status === 'fulfilled') {
+          const [{ _id: productId, ...details }] = item.value;
+          return {
+            productId,
+            ...details,
+            quantity: basket.items[productId]
+          };
+        }
+        return {};
+      })
+    };
 
     return res.json({
       status: 'ok',

@@ -1,8 +1,13 @@
 language: node_js
 node_js:
-  - 14
+- 14
 services: mongodb
 env:
   global:
-    - DB_URL=mongodb://127.0.0.1:27017/
-    - DB_NAME=whiskse
+  - DB_URL=mongodb://127.0.0.1:27017/
+  - DB_NAME=whiskse
+deploy:
+provider: heroku
+  api_key:
+    secure: od+B8EpjSQv2XPkkZM/SbdJLdNTmdeabyOJCsWRKU040Z0+J7aS+Ow/TtMbcKz1DyvaRVZyxk844/OPa+fRca/syr3O17gFD+NDxNKYCt0UIrgD28gnI6+L1WLtCNRgABMJ5o+aDvhMsAgbg5qJxJSTpwrTrkPkkhB8afzaDTDir/K+LaBtDFCT9gnBJpKjgZBc7TLlaisCBrhcxkU63OFJKrOLb9SmGrr1qdmyspoQXvrMpz2BD2vuUpZycok5YI4keV4IcI27BiMQAov3Lom8qaMOiAvNblkvZUv2AyqNohqsYM19XD8Pd1SvhBBZSE31+eLqNd+d63Bi9fijV+l3nbLpulOI9VQrp5qz4W5+4Fkj+Aj5rS0/H0qASj9grogR2hN1PP+vJXXi/SR7WJ1f9a8c3mCL6T0wvXSpUCCMqMsSBEm/wgBBHvumWca8k2tg1j2+LVZLqmGiFi0/B/tN0VQ01Q3/3xqIkbceBWrV7DmbkLExIc4cSRlQZ9AfFiEaDXc2is19rjXR6ZTZniD4xtKGonLSaE1NrtirUktod/xEPPJUjzyqYRqgFahNBWClYxC+45lgX+F1MRfI6vJSCQDaOhe6Qv6fZ66dxNfiMzwgwFVbsD3jDK4s6DP1nBu5DF7eHAaeF5IJwe6wgsyL49YAI2Ittv68LI0wEmDU=
+

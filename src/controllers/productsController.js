@@ -3,7 +3,7 @@ const tag = 'store-api:productsController';
 
 // Requirements
 const debug = require('debug')(tag);
-const { getProducts } = require('../controllers/dbController')();
+const { getProducts, getProductById } = require('../controllers/dbController')();
 
 function productsController() {
   async function fetchProducts(req, res) {
@@ -14,8 +14,24 @@ function productsController() {
     });
   }
 
+  async function fetchProduct(req, res) {
+    const { id } = req.params;
+
+    const product = await getProductById(id);
+    if (product.length < 1) {
+      return res.json({
+        status: 'error'
+      });
+    }
+    return res.json({
+      status: 'ok',
+      product: product[0]
+    })
+  }
+
   return {
-    fetchProducts
+    fetchProducts,
+    fetchProduct
   };
 }
 

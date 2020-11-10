@@ -11,6 +11,7 @@ const {
   disconnect,
   addProduct,
   getProducts,
+  getProductById,
   numProducts
 } = require('../src/controllers/dbController')();
 
@@ -63,6 +64,16 @@ describe('Database testing...', () => {
       const response = await getProducts();
       assert.strictEqual(response.length, 1);
       assert.deepStrictEqual(response[0], product);
-    })
+    });
+
+    it('gets single product by id', async () => {
+      const product = products[0];
+      const addResponse = await addProduct(product);
+      const { insertedId: id } = addResponse;
+
+      const response = await getProductById(id);
+      assert.strictEqual(response.length, 1);
+      assert.deepStrictEqual(response[0], product);
+    });
   })
 });

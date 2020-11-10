@@ -3,7 +3,7 @@ const tag = 'store-api:db-control';
 
 // Requirements
 require('dotenv').config();
-const { MongoClient, ObjectID } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const debug = require('debug')(tag);
 
 const dbUrl = process.env.DB_URL;
@@ -75,6 +75,11 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
     });
   }
 
+  // Get Products from DB
+  function getProductById(id) {
+    return getProducts({ _id: ObjectId(id) });
+  }
+
   // Get Number of Products
   function numProducts() {
     return new Promise((resolve, reject) => {
@@ -94,6 +99,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
     getCursor,
     addProduct,
     getProducts,
+    getProductById,
     numProducts
   };
 }

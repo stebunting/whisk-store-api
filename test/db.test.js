@@ -13,7 +13,8 @@ const {
   getProducts,
   getProductById,
   numProducts,
-  addBasket
+  addBasket,
+  getBasketById
 } = require('../src/controllers/dbController')();
 
 describe('Database testing...', () => {
@@ -30,6 +31,7 @@ describe('Database testing...', () => {
 
   async function setupTest() {
     getCursor('storeProducts').drop();
+    getCursor('storeBaskets').drop();
     products = testData.products;
   }
 
@@ -86,6 +88,15 @@ describe('Database testing...', () => {
       assert.strictEqual(response.insertedCount, 1);
       assert.strictEqual(response.ops.length, 1);
       assert.deepStrictEqual(response.ops[0].items, {});
+    });
+
+    it('successfully gets basket...', async () => {
+      const addResponse = await addBasket();
+      const { insertedId: id } = addResponse;
+
+      const response = await getBasketById(id);
+      assert.strictEqual(response.length, 1);
+      assert.deepStrictEqual(response[0]._id, id);
     });
   });
 });

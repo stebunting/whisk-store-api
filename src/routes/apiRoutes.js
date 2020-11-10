@@ -5,7 +5,7 @@ const tag = 'store-api:products';
 const express = require('express');
 const debug = require('debug')(tag);
 const { fetchProducts, fetchProduct } = require('../controllers/productsController')();
-const { createBasket } = require('../controllers/basketController')();
+const { getBasket, createBasket } = require('../controllers/basketController')();
 
 function routes() {
   const apiRoutes = express.Router();
@@ -13,6 +13,7 @@ function routes() {
   apiRoutes.route('/products').get(fetchProducts);
   apiRoutes.route('/product/:id').get(fetchProduct);
 
+  apiRoutes.route('/basket/:id').get(getBasket);
   apiRoutes.route('/basket').post(createBasket);
 
   return apiRoutes;

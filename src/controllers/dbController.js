@@ -104,6 +104,20 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
     });
   }
 
+  // Get Basket from DB
+  function getBasketById(id) {
+    return new Promise((resolve, reject) => {
+      if (!isConnected()) {
+        return reject(new Error('Not connected to database'));
+      }
+      return db.collection('storeBaskets').find({
+        _id: ObjectId(id)
+      }).toArray()
+        .then((data) => resolve(data))
+        .catch((error) => reject(error));
+    });
+  }
+
   return {
     connect,
     isConnected,
@@ -113,7 +127,8 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
     getProducts,
     getProductById,
     numProducts,
-    addBasket
+    addBasket,
+    getBasketById
   };
 }
 

@@ -1,0 +1,35 @@
+{
+  "name": "whisk-store-api",
+  "version": "1.0.0",
+  "description": "Whisk.se Store API",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app",
+    "dev": "nodemon app",
+    "test": "nyc mocha"
+  },
+  "author": "Steve Bunting",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongodb": "^3.6.3"
+  },
+  "nodemonConfig": {
+    "restartable": "rs",
+    "ignore": [
+      "node_modules/**/node_modules"
+    ],
+    "env": {
+      "NODE_ENV": "development",
+      "PORT": 5000,
+      "DEBUG": "store-api,store-api:*",
+      "DEBUG_DEPTH": 5
+    }
+  },
+  "devDependencies": {
+    "eslint": "^7.13.0",
+    "mocha": "^8.2.1",
+    "nyc": "^15.1.0"
+  }
+}

@@ -58,9 +58,7 @@ function basketController() {
     const { id } = req.params;
     const { body } = req;
 
-    await Promise.allSettled(body.map((product) => (
-      updateBasketById(id, product.productId, parseInt(product.quantity, 10))
-    )));
+    await updateBasketById(id, body.productId, parseInt(body.quantity, 10));
     next();
   }
 

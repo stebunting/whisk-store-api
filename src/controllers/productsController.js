@@ -1,8 +1,8 @@
 // Page Tag
-// const tag = 'store-api:productsController';
+const tag = 'store-api:productsController';
 
 // Requirements
-// const debug = require('debug')(tag);
+const debug = require('debug')(tag);
 const { getProducts, getProductById } = require('./dbController')();
 
 function productsController() {

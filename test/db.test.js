@@ -1,11 +1,9 @@
-// Page Tag
-// const tag = 'store-api:db.test';
-
 // Requirements
 const assert = require('assert').strict;
 const testData = require('./testData.json');
 const {
   connect,
+  test,
   isConnected,
   getCursor,
   disconnect,
@@ -21,18 +19,21 @@ const {
 describe('Database testing...', () => {
   let products;
 
-  before(async () => {
+  before('Connect to MongoDB', async () => {
     await connect();
     assert(isConnected());
+    test(true);
   });
 
-  after(() => {
+  after('Remove test collections and disconnect from MongoDB', async () => {
+    await getCursor('products').drop();
+    await getCursor('baskets').drop();
     disconnect();
   });
 
   async function setupTest() {
-    getCursor('storeProducts').drop();
-    getCursor('storeBaskets').drop();
+    await getCursor('products').deleteMany({});
+    await getCursor('baskets').deleteMany({});
     products = testData.products;
   }
 
@@ -100,7 +101,7 @@ describe('Database testing...', () => {
       assert.deepStrictEqual(response[0]._id, id);
     });
 
-    it.skip('successfully adds item to basket...', async () => {
+    it('successfully adds item to basket...', async () => {
       const addResponse = await addBasket();
       const { insertedId: id } = addResponse;
 
@@ -112,7 +113,7 @@ describe('Database testing...', () => {
       assert.strictEqual(getResponse[0].items.abcdef123456, 3);
     });
 
-    it.skip('successfully increments item already in basket...', async () => {
+    it('successfully increments item already in basket...', async () => {
       const addResponse = await addBasket();
       const { insertedId: id } = addResponse;
       await updateBasketById(id, 'abcdef123456', 3);
@@ -123,7 +124,7 @@ describe('Database testing...', () => {
       assert.strictEqual(getResponse[0].items.abcdef123456, 5);
     });
 
-    it.skip('successfully decrements item already in basket...', async () => {
+    it('successfully decrements item already in basket...', async () => {
       const addResponse = await addBasket();
       const { insertedId: id } = addResponse;
       await updateBasketById(id, 'abcdef123456', 8);

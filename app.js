@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Connect to MongoDB and SMTP Server
-const dbController = require('./src/controllers/dbController')(tag);
+const dbController = require('./src/controllers/dbController')();
 
 dbController.connect();
 

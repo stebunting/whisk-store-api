@@ -7,10 +7,25 @@ const { MongoClient, ObjectId } = require('mongodb');
 const debug = require('debug')(tag);
 
 const dbUrl = process.env.DB_URL;
+const dbName = process.env.DB_NAME;
 let client;
 let db;
+const collections = {
+  products: 'storeProducts',
+  baskets: 'storeBaskets'
+};
 
-function dbController(loggingTag, dbName = process.env.DB_NAME) {
+function dbController() {
+  function test(testing = false) {
+    if (testing) {
+      collections.products = '__test_storeProducts';
+      collections.baskets = '__test_storeBaskets';
+    } else {
+      collections.products = 'storeProducts';
+      collections.baskets = 'storeBaskets';
+    }
+  }
+
   // Connect to MongoDB Database
   function connect() {
     return new Promise((resolve, reject) => {
@@ -48,7 +63,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
 
   // Return a Database Instance
   function getCursor(collection) {
-    return db.collection(collection);
+    return db.collection(collections[collection]);
   }
 
   // Add New Product
@@ -57,7 +72,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
       if (!isConnected()) {
         return reject(new Error('Not connected to database'));
       }
-      return db.collection('storeProducts').insertOne(product)
+      return db.collection(collections.products).insertOne(product)
         .then((data) => resolve(data))
         .catch((error) => reject(error));
     });
@@ -69,7 +84,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
       if (!isConnected()) {
         return reject(new Error('Not connected to database'));
       }
-      return db.collection('storeProducts').find(query).toArray()
+      return db.collection(collections.products).find(query).toArray()
         .then((data) => resolve(data))
         .catch((error) => reject(error));
     });
@@ -86,7 +101,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
       if (!isConnected()) {
         return reject(new Error('Not connected to database'));
       }
-      return db.collection('storeProducts').countDocuments()
+      return db.collection(collections.products).countDocuments()
         .then((data) => resolve(data))
         .catch((error) => reject(error));
     });
@@ -98,7 +113,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
       if (!isConnected()) {
         return reject(new Error('Not connected to database'));
       }
-      return db.collection('storeBaskets').insertOne({ items: {} })
+      return db.collection(collections.baskets).insertOne({ items: {} })
         .then((data) => resolve(data))
         .catch((error) => reject(error));
     });
@@ -110,7 +125,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
       if (!isConnected()) {
         return reject(new Error('Not connected to database'));
       }
-      return db.collection('storeBaskets').updateOne(
+      return db.collection(collections.baskets).updateOne(
         { _id: ObjectId(id) },
         { $inc: { [`items.${productId}`]: quantity } }
       ).then((data) => resolve(data))
@@ -124,7 +139,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
       if (!isConnected()) {
         return reject(new Error('Not connected to database'));
       }
-      return db.collection('storeBaskets').find({
+      return db.collection(collections.baskets).find({
         _id: ObjectId(id)
       }).toArray()
         .then((data) => resolve(data))
@@ -133,6 +148,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
   }
 
   return {
+    test,
     connect,
     isConnected,
     disconnect,

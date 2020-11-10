@@ -100,7 +100,7 @@ describe('Database testing...', () => {
       assert.deepStrictEqual(response[0]._id, id);
     });
 
-    it('successfully adds item to basket...', async () => {
+    it.skip('successfully adds item to basket...', async () => {
       const addResponse = await addBasket();
       const { insertedId: id } = addResponse;
 

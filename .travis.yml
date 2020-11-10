@@ -1,13 +1,17 @@
 language: node_js
 node_js:
-  - 14
+- 14
 services: mongodb
 env:
   global:
-    - DB_URL=mongodb://127.0.0.1:27017/
-    - DB_NAME=whiskse
+  - DB_URL=mongodb://127.0.0.1:27017/
+  - DB_NAME=whiskse
 deploy:
   provider: heroku
   api_key:
-    secure: od+B8EpjSQv2XPkkZM/SbdJLdNTmdeabyOJCsWRKU040Z0+J7aS+Ow/TtMbcKz1DyvaRVZyxk844/OPa+fRca/syr3O17gFD+NDxNKYCt0UIrgD28gnI6+L1WLtCNRgABMJ5o+aDvhMsAgbg5qJxJSTpwrTrkPkkhB8afzaDTDir/K+LaBtDFCT9gnBJpKjgZBc7TLlaisCBrhcxkU63OFJKrOLb9SmGrr1qdmyspoQXvrMpz2BD2vuUpZycok5YI4keV4IcI27BiMQAov3Lom8qaMOiAvNblkvZUv2AyqNohqsYM19XD8Pd1SvhBBZSE31+eLqNd+d63Bi9fijV+l3nbLpulOI9VQrp5qz4W5+4Fkj+Aj5rS0/H0qASj9grogR2hN1PP+vJXXi/SR7WJ1f9a8c3mCL6T0wvXSpUCCMqMsSBEm/wgBBHvumWca8k2tg1j2+LVZLqmGiFi0/B/tN0VQ01Q3/3xqIkbceBWrV7DmbkLExIc4cSRlQZ9AfFiEaDXc2is19rjXR6ZTZniD4xtKGonLSaE1NrtirUktod/xEPPJUjzyqYRqgFahNBWClYxC+45lgX+F1MRfI6vJSCQDaOhe6Qv6fZ66dxNfiMzwgwFVbsD3jDK4s6DP1nBu5DF7eHAaeF5IJwe6wgsyL49YAI2Ittv68LI0wEmDU=
-  on: main
+    secure: SPIMiHeZ4rufZrATNX+sdLepGEzPGOWrZRNkXN5pATcYv6ZrlDvBDpk6E5MCWao+KgAfJr5eXpkn6BzvgEf/8w/8mQs5fnMN3c76utygvd0s14N5gSvSf+dM109Re2FeT6vD7dem5DESB65vM7ufTbdcIlElKRnyyDNZZG4nkt9EPwrKQ+Jo9/RQPFRWoqEj1KbdK9SN9NDA/+SXRovmoMRJyguqXfwXS+t8HwhvcJ9axwn4+GTX1+S9oIiBN1cERdEFjd7Ie27i+t0QP3sKbG0WL/9Df+whGoS1JIOhh0pP9zktTH4AYOTXXVpE+LjB/mOmTFqDKuAebYCUcKOU7PKvORzAZ3pNmNqJITAmlLf1oCzATH9z3y+cS0fJWFZ4IR/AZcJ/+W4+ZcMS8aLzZMEy1jmM/joy/EUsRK8NqPf6Z3mW0y+Owp5iPc7NVaGgOChsRi61XDMAlkaH0ZWYdNwXF7uDDJpQwBJ4uQXfawgbNpfbF+qDwoJaIYEhCK+2PQczMkaOzwE3IHwKRoTYto+wBicoU9wpUqTf27SBllOBzNkGlBIr3OeTZcIVFP/e1ADcky19qs5GT7PB9/VbJk8wh+ZGjruTN+oWpfq3JMx2znATmeBLPuFB9u/ROvFDfgxgVBFAdczFjcMAGiJ3WPriaej0YNW3+zqwz+WTvfo=
+  app: whisk-store-api
+  on:
+    repo: stebunting/whisk-store-api
+    branch: main
+  skip_cleanup: 'true'

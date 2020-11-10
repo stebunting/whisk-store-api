@@ -4,11 +4,13 @@ const tag = 'store-api';
 // Requirements
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const debug = require('debug')(tag);
 
 // App configuration
 const app = express();
 const port = process.env.PORT || 3000;
+app.use(cors());
 
 // Connect to MongoDB and SMTP Server
 const dbController = require('./src/controllers/dbController')(tag);

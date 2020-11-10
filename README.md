@@ -13,3 +13,15 @@ GET /api/products
 ```
 GET /api/product/:id
 ```
+
+## Update shopping cart
+
+```
+POST /api/shoppingcart
+```
+
+## Get shopping cart
+
+```
+GET /api/shoppingcart/:id
+```

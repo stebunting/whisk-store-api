@@ -27,7 +27,7 @@ describe('Database testing...', () => {
   });
 
   async function setupTest() {
-    getCursor('products').drop();
+    getCursor('storeProducts').drop();
     products = testData.products;
   }
 

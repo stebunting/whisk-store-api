@@ -57,7 +57,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
       if (!isConnected()) {
         return reject(new Error('Not connected to database'));
       }
-      return db.collection('products').insertOne(product)
+      return db.collection('storeProducts').insertOne(product)
         .then((data) => resolve(data))
         .catch((error) => reject(error));
     });
@@ -69,7 +69,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
       if (!isConnected()) {
         return reject(new Error('Not connected to database'));
       }
-      return db.collection('products').find(query).toArray()
+      return db.collection('storeProducts').find(query).toArray()
         .then((data) => resolve(data))
         .catch((error) => reject(error));
     });
@@ -81,7 +81,7 @@ function dbController(loggingTag, dbName = process.env.DB_NAME) {
       if (!isConnected()) {
         return reject(new Error('Not connected to database'));
       }
-      return db.collection('products').countDocuments()
+      return db.collection('storeProducts').countDocuments()
         .then((data) => resolve(data))
         .catch((error) => reject(error));
     });

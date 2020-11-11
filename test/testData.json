@@ -2,7 +2,7 @@
   "products": [{
     "name": "Christmas Box",
     "description": "A Christmas Box",
-    "netPrice": 450
+    "grossPrice": 450
   }],
   "baskets": [{
     "_id": "5faaab09669770905ac10e2f",

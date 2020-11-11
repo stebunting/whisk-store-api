@@ -5,8 +5,21 @@ const tag = 'store-api:basketController';
 const debug = require('debug')(tag);
 const { getBasketById, addBasket, updateBasketById } = require('./dbController')();
 const { getProductById } = require('./dbController')();
+const { calculateMoms } = require('../functions/helpers');
 
 function basketController() {
+  // Method to get a statement from a baskets items
+  function getStatement(items) {
+    const bottomLine = items.reduce((acc, next) => ({
+      totalMoms: acc.totalMoms + calculateMoms(next.grossPrice, next.momsRate),
+      totalPrice: acc.totalPrice + next.linePrice
+    }), {
+      totalMoms: 0,
+      totalPrice: 0
+    });
+    return { bottomLine };
+  }
+
   // Method to get a basket
   async function getBasket(req, res) {
     const { id } = req.params;
@@ -21,20 +34,26 @@ function basketController() {
     const response = await Promise.allSettled(
       Object.keys(basket.items).map((key) => getProductById(key))
     );
+    const items = response.map((item) => {
+      if (item.status === 'fulfilled') {
+        const [{ _id: productId, ...details }] = item.value;
+        const quantity = basket.items[productId];
+        return {
+          productId,
+          ...details,
+          quantity,
+          linePrice: details.grossPrice * quantity
+        };
+      }
+      return {};
+    });
+
     basket = {
       basketId: basket._id,
-      items: response.map((item) => {
-        if (item.status === 'fulfilled') {
-          const [{ _id: productId, ...details }] = item.value;
-          return {
-            productId,
-            ...details,
-            quantity: basket.items[productId]
-          };
-        }
-        return {};
-      })
+      items,
+      statement: getStatement(items)
     };
+    debug(basket);
 
     return res.json({
       status: 'ok',

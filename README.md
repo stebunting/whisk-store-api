@@ -20,14 +20,23 @@ GET /api/product/:id
 POST /api/basket
 ```
 
-## Update basket
+## Update single item in basket
 
 ```
 PUT /api/basket/:id
 ```
 
-## Get basket
+## Get basket with statement
 
 ```
 GET /api/basket/:id
+
+RETURN OBJECT
+{
+  basketId: mongoId,
+  items: [object]
+  statement: {
+    bottomLine: object
+  }
+}
 ```

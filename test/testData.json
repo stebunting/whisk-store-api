@@ -9,5 +9,29 @@
     "items": {
       "5faaab09669770905ac10e1f": 2
     }
-  }]
+  }],
+  "orders": [{
+    "details": {
+      "name": "ste",
+      "email": "stebunting@gmail.com",
+      "telephone": "07378978497324"
+    },
+    "delivery": {
+      "type": "collection",
+      "date": "2020-50-2"
+    },
+    "items": [
+      {
+        "productId": "5faafded3dcb1ac5af67870e",
+        "grossPrice": 45000,
+        "momsRate": 12,
+        "quantity": 2
+      }
+    ],
+    "bottomLine": {
+      "totalMoms": 4821,
+      "totalPrice": 90000 },
+    "payment": {
+      "method": "swish" }
+    }]
 }

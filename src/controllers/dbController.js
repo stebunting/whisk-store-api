@@ -12,7 +12,8 @@ let client;
 let db;
 const collections = {
   products: 'storeProducts',
-  baskets: 'storeBaskets'
+  baskets: 'storeBaskets',
+  orders: 'storeOrders'
 };
 
 function dbController() {
@@ -20,9 +21,11 @@ function dbController() {
     if (testing) {
       collections.products = '__test_storeProducts';
       collections.baskets = '__test_storeBaskets';
+      collections.orders = '__test_storeOrders';
     } else {
       collections.products = 'storeProducts';
       collections.baskets = 'storeBaskets';
+      collections.orders = 'storeOrders';
     }
   }
 
@@ -96,12 +99,12 @@ function dbController() {
   }
 
   // Get Number of Products
-  function numProducts() {
+  function count(collection) {
     return new Promise((resolve, reject) => {
       if (!isConnected()) {
         return reject(new Error('Not connected to database'));
       }
-      return db.collection(collections.products).countDocuments()
+      return db.collection(collections[collection]).countDocuments()
         .then((data) => resolve(data))
         .catch((error) => reject(error));
     });
@@ -109,11 +112,15 @@ function dbController() {
 
   // Create New Basket
   function addBasket() {
+    const newBasket = {
+      items: {},
+      delivery: {}
+    };
     return new Promise((resolve, reject) => {
       if (!isConnected()) {
         return reject(new Error('Not connected to database'));
       }
-      return db.collection(collections.baskets).insertOne({ items: {} })
+      return db.collection(collections.baskets).insertOne(newBasket)
         .then((data) => resolve(data))
         .catch((error) => reject(error));
     });
@@ -147,19 +154,46 @@ function dbController() {
     });
   }
 
+  // Get Basket from DB
+  function removeBasketById(id) {
+    return new Promise((resolve, reject) => {
+      if (!isConnected()) {
+        return reject(new Error('Not connected to database'));
+      }
+      return db.collection(collections.baskets).deleteOne({
+        _id: ObjectId(id)
+      }).then((data) => resolve(data))
+        .catch((error) => reject(error));
+    });
+  }
+
+  // Create New Order
+  function addOrder(order) {
+    return new Promise((resolve, reject) => {
+      if (!isConnected()) {
+        return reject(new Error('Not connected to database'));
+      }
+      return db.collection(collections.orders).insertOne(order)
+        .then((data) => resolve(data))
+        .catch((error) => reject(error));
+    });
+  }
+
   return {
     test,
     connect,
     isConnected,
     disconnect,
     getCursor,
+    count,
     addProduct,
     getProducts,
     getProductById,
-    numProducts,
     addBasket,
     updateBasketById,
-    getBasketById
+    getBasketById,
+    removeBasketById,
+    addOrder
   };
 }
 

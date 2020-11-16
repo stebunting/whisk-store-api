@@ -16,7 +16,8 @@
     "debug": "^4.2.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "mongodb": "^3.6.3"
+    "mongodb": "^3.6.3",
+    "swish-merchant": "^0.0.9"
   },
   "nodemonConfig": {
     "restartable": "rs",

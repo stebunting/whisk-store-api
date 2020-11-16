@@ -5,7 +5,13 @@
 const express = require('express');
 // const debug = require('debug')(tag);
 const { fetchProducts, fetchProduct } = require('../controllers/productsController')();
-const { getBasket, createBasket, updateBasket } = require('../controllers/basketController')();
+const {
+  apiGetBasket,
+  apiCreateBasket,
+  updateBasket,
+  apiDeleteBasket
+} = require('../controllers/basketController')();
+const { createOrder } = require('../controllers/orderController')();
 
 function routes() {
   const apiRoutes = express.Router();
@@ -13,9 +19,12 @@ function routes() {
   apiRoutes.route('/products').get(fetchProducts);
   apiRoutes.route('/product/:id').get(fetchProduct);
 
-  apiRoutes.route('/basket/:id').get(getBasket);
-  apiRoutes.route('/basket').post(createBasket);
-  apiRoutes.route('/basket/:id').put(updateBasket, getBasket);
+  apiRoutes.route('/basket/:id').get(apiGetBasket);
+  apiRoutes.route('/basket').post(apiCreateBasket, apiGetBasket);
+  apiRoutes.route('/basket/:id').put(updateBasket, apiGetBasket);
+  apiRoutes.route('/basket/:basketId').delete(apiDeleteBasket, apiCreateBasket, apiGetBasket);
+
+  apiRoutes.route('/order/:basketId').post(createOrder);
 
   return apiRoutes;
 }

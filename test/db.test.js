@@ -10,14 +10,17 @@ const {
   addProduct,
   getProducts,
   getProductById,
-  numProducts,
+  count,
   addBasket,
   updateBasketById,
-  getBasketById
+  getBasketById,
+  removeBasketById,
+  addOrder
 } = require('../src/controllers/dbController')();
 
 describe('Database testing...', () => {
   let products;
+  let orders;
 
   before('Connect to MongoDB', async () => {
     await connect();
@@ -35,13 +38,14 @@ describe('Database testing...', () => {
     await getCursor('products').deleteMany({});
     await getCursor('baskets').deleteMany({});
     products = testData.products;
+    orders = testData.orders;
   }
 
   describe('Products...', () => {
     beforeEach(setupTest);
 
     it('starts with empty db...', async () => {
-      const response = await numProducts();
+      const response = await count('products');
       assert.strictEqual(response, 0);
     });
 
@@ -53,7 +57,7 @@ describe('Database testing...', () => {
       assert.strictEqual(response.ops.length, 1);
       assert.deepStrictEqual(response.ops[0], product);
 
-      const entries = await numProducts();
+      const entries = await count('products');
       assert.strictEqual(entries, 1);
     });
 
@@ -133,6 +137,30 @@ describe('Database testing...', () => {
       const getResponse = await getBasketById(id);
       assert.strictEqual(getResponse.length, 1);
       assert.strictEqual(getResponse[0].items.abcdef123456, 4);
+    });
+
+    it('successfully removes basket...', async () => {
+      const addResponse = await addBasket();
+      const { insertedId: id } = addResponse;
+      let numBaskets = await count('baskets');
+      assert.strictEqual(numBaskets, 1);
+
+      const deleteResponse = await removeBasketById(id);
+      numBaskets = await count('baskets');
+      assert.strictEqual(deleteResponse.deletedCount, 1);
+      assert.strictEqual(numBaskets, 0);
+    });
+  });
+
+  describe('Orders...', () => {
+    beforeEach(setupTest);
+
+    it('successfully adds new order...', async () => {
+      const order = orders[0];
+      const response = await addOrder(order);
+      assert.strictEqual(response.insertedCount, 1);
+      assert.strictEqual(response.ops.length, 1);
+      assert.deepStrictEqual(response.ops[0], order);
     });
   });
 });

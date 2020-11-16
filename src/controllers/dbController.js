@@ -193,6 +193,20 @@ function dbController() {
     });
   }
 
+  // Check Swish Status
+  function getSwishStatus(swishId) {
+    return new Promise((resolve, reject) => {
+      if (!isConnected()) {
+        return reject(new Error('Not connected to database'));
+      }
+      return db.collection(collections.orders).find(
+        { 'payment.swish.id': swishId }
+      ).toArray()
+        .then((data) => resolve(data.map((payment) => payment.payment.swish)))
+        .catch((error) => reject(error));
+    });
+  }
+
   // Update payment details
   function updateSwishPayment(payment) {
     return new Promise((resolve, reject) => {
@@ -223,6 +237,7 @@ function dbController() {
     removeBasketById,
     addOrder,
     getOrderById,
+    getSwishStatus,
     updateSwishPayment
   };
 }

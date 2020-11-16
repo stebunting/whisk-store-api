@@ -11,7 +11,7 @@ const {
   updateBasket,
   apiDeleteBasket
 } = require('../controllers/basketController')();
-const { createOrder, swishCallback } = require('../controllers/orderController')();
+const { createOrder, checkPaymentStatus, swishCallback } = require('../controllers/orderController')();
 
 function routes() {
   const apiRoutes = express.Router();
@@ -25,8 +25,8 @@ function routes() {
   apiRoutes.route('/basket/:basketId').delete(apiDeleteBasket, apiCreateBasket, apiGetBasket);
 
   apiRoutes.route('/order/:basketId').post(createOrder);
-
-  apiRoutes.route('/swishcallback').post(swishCallback);
+  apiRoutes.route('/order/swish/:swishId').get(checkPaymentStatus);
+  apiRoutes.route('/order/swish/callback').post(swishCallback);
 
   return apiRoutes;
 }

@@ -17,6 +17,7 @@ const {
   removeBasketById,
   addOrder,
   getOrderById,
+  getSwishStatus,
   updateSwishPayment
 } = require('../src/controllers/dbController')();
 
@@ -191,6 +192,20 @@ describe('Database testing...', () => {
       const getResponse = await getOrderById(insertedId);
       assert.strictEqual(getResponse.length, 1);
       assert.deepStrictEqual(getResponse[0].payment.swish, payment);
+    });
+
+    it('successfully checks Swish status', async () => {
+      await addOrder(orders[1]);
+
+      const { id: swishId } = orders[1].payment.swish;
+      const firstResponse = await getSwishStatus(swishId);
+      assert.strictEqual(firstResponse.length, 1);
+      assert(!firstResponse[0].status);
+
+      await updateSwishPayment(swishPayments[1]);
+      const secondResponse = await getSwishStatus(swishId);
+      assert.strictEqual(secondResponse.length, 1);
+      assert.deepStrictEqual(secondResponse[0], swishPayments[1]);
     });
   });
 });

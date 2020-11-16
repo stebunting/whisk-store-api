@@ -37,6 +37,34 @@
         "id": "834AA1CE6D784D309CCB97D2D3EE7307"
       }
     }
+  }, {
+    "details" : {
+      "name" : "ste",
+      "email" : "stebunting@gmail.com",
+      "telephone" : "0733283460"
+    },
+    "delivery" : {
+      "type" : "collection",
+      "date" : "2020-50-2"
+    },
+    "items" : [
+      {
+        "productId" : "5faafded3dcb1ac5af67870e",
+        "grossPrice" : 45000,
+        "momsRate" : 12,
+        "quantity" : 2
+      }
+    ],
+    "bottomLine" : {
+      "totalMoms" : 4821,
+      "totalPrice" : 90000
+    },
+    "payment" : {
+      "method" : "swish",
+      "swish" : {
+        "id" : "F3630DCD06F247DE8E62A9E5927F4ACC"
+      }
+    }
   }],
   "swishPayments": [{
     "id": "834AA1CE6D784D309CCB97D2D3EE7307",
@@ -53,5 +81,20 @@
     "dateCreated": "2020-11-16T19:45:39.007Z",
     "datePaid": null,
     "errorCode": null
+  }, {
+    "id" : "F3630DCD06F247DE8E62A9E5927F4ACC",
+    "payeePaymentReference" : null,
+    "paymentReference" : "099A27F96D8C43A486C95A44545F483C",
+    "callbackUrl" : "https://98a6a4df9949.ngrok.io/api/swishcallback",
+    "payerAlias" : "46733283460",
+    "payeeAlias" : "1230655860",
+    "currency" : "SEK",
+    "message" : "",
+    "errorMessage" : null,
+    "status" : "DECLINED",
+    "amount" : 900,
+    "dateCreated" : "2020-11-16T20:06:52.357Z",
+    "datePaid" : null,
+    "errorCode" : null
   }]
 }

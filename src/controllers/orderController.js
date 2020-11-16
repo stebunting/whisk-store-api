@@ -6,12 +6,17 @@ const Swish = require('swish-merchant');
 const debug = require('debug')(tag);
 const { priceFormat } = require('../functions/helpers');
 const { getBasket } = require('./basketController')();
-const { removeBasketById, addOrder, updateSwishPayment } = require('./dbController')();
+const {
+  removeBasketById,
+  addOrder,
+  getSwishStatus,
+  updateSwishPayment
+} = require('./dbController')();
 const status = require('./orderStatuses');
 
 const swish = new Swish({
   alias: process.env.SWISH_ALIAS,
-  paymentRequestCallback: `${process.env.SWISH_CALLBACK}/api/swishcallback`,
+  paymentRequestCallback: `${process.env.SWISH_CALLBACK}/api/order/swish/callback`,
   cert: JSON.parse(`"${process.env.SWISH_CERT}"`),
   key: JSON.parse(`"${process.env.SWISH_KEY}"`)
 });
@@ -64,7 +69,12 @@ function orderController() {
   async function createOrder(req, res) {
     const { basketId } = req.params;
     const { body } = req;
-    const basket = await getBasket(basketId);
+    let basket;
+    try {
+      basket = await getBasket(basketId);
+    } catch (error) {
+      debug(error);
+    }
 
     const order = parseOrder(body, basket);
 
@@ -95,8 +105,8 @@ function orderController() {
           phoneNumber: order.details.telephone,
           amount: priceFormat(order.bottomLine.totalPrice, { includeSymbol: false })
         });
-        const { id: paymentId } = response;
-        order.payment.swish = { id: paymentId };
+        const { id: swishId } = response;
+        order.payment.swish = { id: swishId };
         await addOrder(order);
 
         return res.json({
@@ -104,13 +114,25 @@ function orderController() {
           order: {
             status: status.ORDERED,
             paymentMethod: order.payment.payment,
-            paymentId
+            swishId
           }
         });
       } catch (error) {
         debug(error.errors);
+        return res.json({ status: 'error' });
       }
+    } else {
+      return res.json({ status: 'error' });
     }
+  }
+
+  async function checkPaymentStatus(req, res) {
+    const { swishId } = req.params;
+    const response = await getSwishStatus(swishId);
+    return res.json({
+      status: 'ok',
+      swish: response[0]
+    });
   }
 
   function swishCallback(req, res) {
@@ -121,6 +143,7 @@ function orderController() {
 
   return {
     createOrder,
+    checkPaymentStatus,
     swishCallback
   };
 }

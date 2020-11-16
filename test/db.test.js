@@ -15,12 +15,15 @@ const {
   updateBasketById,
   getBasketById,
   removeBasketById,
-  addOrder
+  addOrder,
+  getOrderById,
+  updateSwishPayment
 } = require('../src/controllers/dbController')();
 
 describe('Database testing...', () => {
   let products;
   let orders;
+  let swishPayments;
 
   before('Connect to MongoDB', async () => {
     await connect();
@@ -31,14 +34,17 @@ describe('Database testing...', () => {
   after('Remove test collections and disconnect from MongoDB', async () => {
     await getCursor('products').drop();
     await getCursor('baskets').drop();
+    await getCursor('orders').drop();
     disconnect();
   });
 
   async function setupTest() {
     await getCursor('products').deleteMany({});
     await getCursor('baskets').deleteMany({});
+    await getCursor('orders').deleteMany({});
     products = testData.products;
     orders = testData.orders;
+    swishPayments = testData.swishPayments;
   }
 
   describe('Products...', () => {
@@ -161,6 +167,30 @@ describe('Database testing...', () => {
       assert.strictEqual(response.insertedCount, 1);
       assert.strictEqual(response.ops.length, 1);
       assert.deepStrictEqual(response.ops[0], order);
+    });
+
+    it('successfully gets order', async () => {
+      const order = orders[0];
+      const addResponse = await addOrder(order);
+      const { insertedId } = addResponse;
+
+      const getResponse = await getOrderById(insertedId);
+      assert.strictEqual(getResponse.length, 1);
+      assert.deepStrictEqual(getResponse[0], order);
+    });
+
+    it('successfully updates order payment status', async () => {
+      const order = orders[0];
+      const payment = swishPayments[0];
+      const addResponse = await addOrder(order);
+      const { insertedId } = addResponse;
+
+      const response = await updateSwishPayment(payment);
+      assert.strictEqual(response.modifiedCount, 1);
+
+      const getResponse = await getOrderById(insertedId);
+      assert.strictEqual(getResponse.length, 1);
+      assert.deepStrictEqual(getResponse[0].payment.swish, payment);
     });
   });
 });

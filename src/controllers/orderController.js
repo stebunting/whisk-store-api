@@ -6,11 +6,12 @@ const Swish = require('swish-merchant');
 const debug = require('debug')(tag);
 const { priceFormat } = require('../functions/helpers');
 const { getBasket } = require('./basketController')();
-const { removeBasketById, addOrder } = require('./dbController')();
+const { removeBasketById, addOrder, updateSwishPayment } = require('./dbController')();
 const status = require('./orderStatuses');
 
 const swish = new Swish({
   alias: process.env.SWISH_ALIAS,
+  paymentRequestCallback: `${process.env.SWISH_CALLBACK}/api/swishcallback`,
   cert: JSON.parse(`"${process.env.SWISH_CERT}"`),
   key: JSON.parse(`"${process.env.SWISH_KEY}"`)
 });
@@ -94,11 +95,16 @@ function orderController() {
           phoneNumber: order.details.telephone,
           amount: priceFormat(order.bottomLine.totalPrice, { includeSymbol: false })
         });
+        const { id: paymentId } = response;
+        order.payment.swish = { id: paymentId };
+        await addOrder(order);
+
         return res.json({
           status: 'ok',
           order: {
             status: status.ORDERED,
-            paymentMethod: order.payment.payment
+            paymentMethod: order.payment.payment,
+            paymentId
           }
         });
       } catch (error) {
@@ -107,8 +113,15 @@ function orderController() {
     }
   }
 
+  function swishCallback(req, res) {
+    const { body } = req;
+    updateSwishPayment(body);
+    return res.json({ status: 'thanks very much' });
+  }
+
   return {
-    createOrder
+    createOrder,
+    swishCallback
   };
 }
 

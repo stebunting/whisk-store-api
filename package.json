@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node app",
     "dev": "nodemon app",
+    "ngrok": "ngrok http 5000",
     "test": "nyc mocha"
   },
   "author": "Steve Bunting",

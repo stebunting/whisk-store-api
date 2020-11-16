@@ -179,6 +179,34 @@ function dbController() {
     });
   }
 
+  // Get Order from DB
+  function getOrderById(id) {
+    return new Promise((resolve, reject) => {
+      if (!isConnected()) {
+        return reject(new Error('Not connected to database'));
+      }
+      return db.collection(collections.orders).find({
+        _id: ObjectId(id)
+      }).toArray()
+        .then((data) => resolve(data))
+        .catch((error) => reject(error));
+    });
+  }
+
+  // Update payment details
+  function updateSwishPayment(payment) {
+    return new Promise((resolve, reject) => {
+      if (!isConnected()) {
+        return reject(new Error('Not connected to database'));
+      }
+      return db.collection(collections.orders).updateOne(
+        { 'payment.swish.id': payment.id },
+        { $set: { 'payment.swish': payment } }
+      ).then((data) => resolve(data))
+        .catch((error) => reject(error));
+    });
+  }
+
   return {
     test,
     connect,
@@ -193,7 +221,9 @@ function dbController() {
     updateBasketById,
     getBasketById,
     removeBasketById,
-    addOrder
+    addOrder,
+    getOrderById,
+    updateSwishPayment
   };
 }
 

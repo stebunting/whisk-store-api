@@ -32,6 +32,26 @@
       "totalMoms": 4821,
       "totalPrice": 90000 },
     "payment": {
-      "method": "swish" }
-    }]
+      "method": "swish",
+      "swish": {
+        "id": "834AA1CE6D784D309CCB97D2D3EE7307"
+      }
+    }
+  }],
+  "swishPayments": [{
+    "id": "834AA1CE6D784D309CCB97D2D3EE7307",
+    "payeePaymentReference": null,
+    "paymentReference": "29E594378FF14BE8A6ED87FEB786A773",
+    "callbackUrl": "https://98a6a4df9949.ngrok.io/api/swishcallback",
+    "payerAlias": "46733283460",
+    "payeeAlias": "1230655860",
+    "currency": "SEK",
+    "message": "",
+    "errorMessage": null,
+    "status": "DECLINED",
+    "amount": 900,
+    "dateCreated": "2020-11-16T19:45:39.007Z",
+    "datePaid": null,
+    "errorCode": null
+  }]
 }

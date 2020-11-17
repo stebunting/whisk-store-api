@@ -1,10 +1,10 @@
 // Page Tag
-// const tag = 'store-api:products';
+const tag = 'store-api:products';
 
 // Requirements
 const express = require('express');
-// const debug = require('debug')(tag);
-const { fetchProducts, fetchProduct } = require('../controllers/productsController')();
+const debug = require('debug')(tag);
+const { fetchProducts, fetchProduct } = require('../controllers/productsController');
 const {
   apiGetBasket,
   apiCreateBasket,
@@ -16,9 +16,11 @@ const { createOrder, checkPaymentStatus, swishCallback } = require('../controlle
 function routes() {
   const apiRoutes = express.Router();
 
+  // Routes to get products
   apiRoutes.route('/products').get(fetchProducts);
-  apiRoutes.route('/product/:id').get(fetchProduct);
+  apiRoutes.route('/product/:productId').get(fetchProduct);
 
+  // Routes to set up baskets
   apiRoutes.route('/basket/:id').get(apiGetBasket);
   apiRoutes.route('/basket').post(apiCreateBasket, apiGetBasket);
   apiRoutes.route('/basket/:id').put(updateBasket, apiGetBasket);

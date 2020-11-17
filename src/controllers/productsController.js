@@ -3,47 +3,63 @@ const tag = 'store-api:productsController';
 
 // Requirements
 const debug = require('debug')(tag);
-const { getProducts, getProductById } = require('./dbController')();
+const { getProducts, getProductById } = require('./dbController');
 
-function productsController() {
-  function mapProductsArray(products) {
-    return products.map((product) => {
-      const { _id: productId, ...rest } = product;
-      return ({ productId, ...rest });
-    });
-  }
+// Convert _id field to productId
+function mapProductsArray(products) {
+  return products.map((product) => {
+    const { _id: productId, ...rest } = product;
+    return ({ productId, ...rest });
+  });
+}
 
-  async function fetchProducts(req, res) {
+// Route to fetch all products
+async function fetchProducts(req, res) {
+  try {
+    // Make DB Call
     const data = await getProducts();
-    const products = mapProductsArray(data);
 
-    return res.json({
+    // Format product list and return
+    const products = mapProductsArray(data);
+    return res.status(200).json({
       status: 'ok',
       products
     });
+  } catch (error) {
+    // Database Error
+    return res.status(500).json({
+      status: 'error'
+    });
   }
+}
 
-  async function fetchProduct(req, res) {
-    const { id } = req.params;
+// Route to fetch single product
+async function fetchProduct(req, res) {
+  const { productId } = req.params;
 
-    const data = await getProductById(id);
+  try {
+    // Make DB Call
+    const data = await getProductById(productId);
+
+    // Check a product has been returned
     if (data.length < 1) {
-      return res.json({
+      return res.status(400).json({
         status: 'error'
       });
     }
 
+    // Format product and return
     const product = mapProductsArray(data);
-    return res.json({
+    return res.status(200).json({
       status: 'ok',
       product: product[0]
     });
+  } catch (error) {
+    // Database Error
+    return res.status(500).json({
+      status: 'error'
+    });
   }
-
-  return {
-    fetchProducts,
-    fetchProduct
-  };
 }
 
-module.exports = productsController;
+module.exports = { fetchProducts, fetchProduct };

@@ -63,7 +63,11 @@
       <% for (let i = 0; i < order.items.length; i += 1) {
         const product = order.items[i];
         %><tr>
-          <td class="item"><%=product.productId %></td>
+          <td class="item">
+            <a href="http://localhost:3000/product/<%=product.productId %>">
+              <%=product.productId %>
+            </a>
+          </td>
           <td class="quantity"><%=product.quantity %></td>
           <td class="price"><%=priceFormat(product.grossPrice) %></td>
           <td class="linetotal"><%=priceFormat(product.grossPrice * product.quantity) %></td>

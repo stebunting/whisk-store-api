@@ -8,8 +8,8 @@ const {
   addBasket,
   updateBasketById,
   removeBasketById
-} = require('./dbController')();
-const { getProductById } = require('./dbController')();
+} = require('./dbController');
+const { getProductById } = require('./dbController');
 const { calculateMoms } = require('../functions/helpers');
 
 function basketController() {

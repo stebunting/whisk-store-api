@@ -11,7 +11,8 @@ const {
   addOrder,
   getSwishStatus,
   updateSwishPayment
-} = require('./dbController')();
+} = require('./dbController');
+const { sendConfirmationEmail } = require('./emailController');
 const status = require('./orderStatuses');
 
 const swish = new Swish({
@@ -73,6 +74,8 @@ function orderController() {
   async function createOrder(req, res) {
     const { basketId } = req.params;
     const { body } = req;
+    debug(body);
+
     let basket;
     try {
       basket = await getBasket(basketId);
@@ -81,6 +84,7 @@ function orderController() {
     }
 
     const order = parseOrder(body, basket);
+    const { date: friendlyDate } = body;
 
     // VERIFY ORDER
 
@@ -92,7 +96,7 @@ function orderController() {
         removeBasketById(basketId)
       ]);
 
-      // SEND EMAIL
+      sendConfirmationEmail(order, friendlyDate);
 
       return res.json({
         status: 'ok',

@@ -19,7 +19,7 @@ const {
   getOrderById,
   getSwishStatus,
   updateSwishPayment
-} = require('../src/controllers/dbController')();
+} = require('../src/controllers/dbController');
 
 describe('Database testing...', () => {
   let products;

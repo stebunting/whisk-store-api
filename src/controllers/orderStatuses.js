@@ -1,4 +1,5 @@
 module.exports = {
-  ORDERED: 'ORDERED',
-  CONFIRMED: 'CONFIRMED'
+  NOT_ORDERED: 'NOT_ORDERED',
+  CREATED: 'CREATED',
+  PAID: 'PAID'
 };

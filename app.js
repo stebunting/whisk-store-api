@@ -17,8 +17,10 @@ app.use(cors());
 
 // Connect to MongoDB and SMTP Server
 const dbController = require('./src/controllers/dbController')();
+const emailController = require('./src/controllers/emailController')();
 
 dbController.connect();
+emailController.connect();
 
 // Routing
 const apiRouter = require('./src/routes/apiRoutes')();

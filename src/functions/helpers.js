@@ -23,7 +23,4 @@ function priceFormat(n, userOptions = {}) {
   return str;
 }
 
-module.exports = {
-  calculateMoms,
-  priceFormat
-};
+module.exports = { calculateMoms, priceFormat };

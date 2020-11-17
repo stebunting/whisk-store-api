@@ -18,8 +18,11 @@ const swish = new Swish({
   alias: process.env.SWISH_ALIAS,
   paymentRequestCallback: `${process.env.SWISH_CALLBACK}/api/order/swish/callback`,
   cert: JSON.parse(`"${process.env.SWISH_CERT}"`),
-  key: JSON.parse(`"${process.env.SWISH_KEY}"`)
+  key: JSON.parse(`"${process.env.SWISH_KEY}"`),
+  ca: JSON.parse(`"${process.env.SWISH_CA}"`),
+  password: 'swish'
 });
+swish.url = 'https://mss.cpc.getswish.net/swish-cpcapi';
 
 function orderController() {
   function parseOrder(orderBody, basket) {
@@ -41,7 +44,8 @@ function orderController() {
       })),
       bottomLine: basket.statement.bottomLine,
       payment: {
-        method: orderBody.paymentMethod
+        method: orderBody.paymentMethod,
+        status: status.NOT_ORDERED
       }
     };
 
@@ -82,6 +86,7 @@ function orderController() {
 
     // Payment Link
     if (order.payment.method === 'paymentLink') {
+      order.payment.status = status.CREATED;
       await Promise.allSettled([
         addOrder(order),
         removeBasketById(basketId)
@@ -92,8 +97,8 @@ function orderController() {
       return res.json({
         status: 'ok',
         order: {
-          status: status.CONFIRMED,
-          paymentMethod: order.payment.method
+          status: status.PAID,
+          paymentMethod: order.payment.method,
         }
       });
     }
@@ -103,23 +108,36 @@ function orderController() {
       try {
         const response = await swish.createPaymentRequest({
           phoneNumber: order.details.telephone,
-          amount: priceFormat(order.bottomLine.totalPrice, { includeSymbol: false })
+          amount: priceFormat(order.bottomLine.totalPrice, { includeSymbol: false }),
+          message: 'BE18'
         });
         const { id: swishId } = response;
-        order.payment.swish = { id: swishId };
+        order.payment = {
+          ...order.payment,
+          status: status.CREATED,
+          swish: {
+            id: swishId,
+            status: status.CREATED
+          }
+        };
         await addOrder(order);
 
         return res.json({
           status: 'ok',
           order: {
-            status: status.ORDERED,
-            paymentMethod: order.payment.payment,
-            swishId
+            status: order.payment.status,
+            id: swishId,
+            paymentMethod: order.payment.payment
           }
         });
       } catch (error) {
-        debug(error.errors);
-        return res.json({ status: 'error' });
+        return res.json({
+          status: 'ok',
+          order: {
+            status: 'ERROR',
+            ...error.errors[0]
+          }
+        });
       }
     } else {
       return res.json({ status: 'error' });
@@ -131,7 +149,10 @@ function orderController() {
     const response = await getSwishStatus(swishId);
     return res.json({
       status: 'ok',
-      swish: response[0]
+      order: {
+        ...response[0],
+        paymentMethod: 'swish'
+      }
     });
   }
 

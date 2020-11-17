@@ -1,0 +1,20 @@
+Thanks for stopping by at WHISK.se! We have your order and your treats are on their way.
+
+<%='ITEM'.padEnd(30) + 'QUANTITY'.padEnd(10) + 'PRICE'.padEnd(10) + 'SUB-TOTAL' %><%
+for (let i = 0; i < order.items.length; i += 1) {
+	const product = order.items[i]; %>
+<%=product.productId.padEnd(30) + product.quantity.toString().padEnd(10) + priceFormat(product.grossPrice).padEnd(10) + priceFormat(product.grossPrice * product.quantity) %><%
+}
+%>
+
+MOMs: <%=priceFormat(order.bottomLine.totalMoms, { includeOre: true }) %>
+Total: <%=priceFormat(order.bottomLine.totalPrice) %>
+
+<%if (order.delivery.type === 'collection') { %>Please note that your items must be picked up from our store at Vikingagatan 18 on <%=deliveryDate %>.
+<%} else if (order.delivery.type === 'delivery') { %>Your items will be delivered on <%=deliveryDate %>.<% } %>
+Whisk
+💌 hello@whisk.se
+☎️ +46 73 141 6585
+🏛 Vikingagatan 18, 113 42 Stockholm
+🍰 www.whisk.se
+Organisation number: 5592052277 || MOMs registration number : SE559205-2277

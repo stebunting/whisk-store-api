@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>WHISK Order</title>
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 1em;
+    }
+    th, td {
+      padding: 3px;
+    }
+    th {
+      border-top: 1px #E0E0E0 solid;
+      border-bottom: 1px #E0E0E0 solid;
+    }
+    .orderform { 
+      width: 30em;
+      border-collapse: collapse;
+    }
+    .quantity, .price, .linetotal {
+      width: 24%;
+      text-align: right;
+    }
+    .item {
+      width: 28%;
+      text-align: left;
+    }
+    .subtotal {
+      text-align: right;
+    }
+    .bordertop {
+      border-top: 1px #E0E0E0 solid;
+    }
+    .total {
+      text-align: right;
+      border: 0px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <p>Thanks for stopping by at WHISK.se!  We have your order and your treats are on their way.</p>
+
+  <table class="orderform">
+    <thead>
+      <tr>
+        <th class="item">ITEM</th>
+        <th class="quantity">QUANTITY</th>
+        <th class="price">PRICE</th>
+        <th class="linetotal">SUB-TOTAL</th>
+      </tr>
+    </thead>
+      <tbody>
+      <% for (let i = 0; i < order.items.length; i += 1) {
+        const product = order.items[i];
+        %><tr>
+          <td class="item"><%=product.productId %></td>
+          <td class="quantity"><%=product.quantity %></td>
+          <td class="price"><%=priceFormat(product.grossPrice) %></td>
+          <td class="linetotal"><%=priceFormat(product.grossPrice * product.quantity) %></td>
+        </tr><%
+      } %>
+      <tr>
+        <td class="subtotal" colspan="3">MOMs</td>
+        <td class="subtotal"><%=priceFormat(order.bottomLine.totalMoms, { includeOre: true }) %></td>
+      </tr>
+      <tr>
+        <td class="total" colspan="3">Total</td>
+        <td class="total"><%=priceFormat(order.bottomLine.totalPrice) %></td>
+      </tr>
+    </tbody>
+  </table>
+
+<%if (order.delivery.type === 'collection') {
+%><p>Please note that your items must be picked up from our store at Vikingagatan 18 on <%=deliveryDate %>.</p>
+
+<%} else if (order.delivery.type === 'delivery') {
+%><p>Your items will be delivered on <%=deliveryDate %>.</p><% } %>
+
+</body>
+</html>

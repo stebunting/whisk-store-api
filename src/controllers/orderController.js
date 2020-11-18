@@ -5,7 +5,7 @@ const tag = 'store-api:orderController';
 const Swish = require('swish-merchant');
 const debug = require('debug')(tag);
 const { priceFormat } = require('../functions/helpers');
-const { getBasket } = require('./basketController')();
+const { getBasket } = require('./basketController');
 const {
   removeBasketById,
   addOrder,

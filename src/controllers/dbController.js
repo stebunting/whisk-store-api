@@ -133,7 +133,20 @@ function updateBasketById(id, productId, quantity) {
     }
     return db.collection(collections.baskets).updateOne(
       { _id: ObjectId(id) },
-      { $inc: { [`items.${productId}`]: quantity } }
+      { $set: { [`items.${productId}`]: quantity } }
+    ).then((data) => resolve(data))
+      .catch((error) => reject(error));
+  });
+}
+
+function removeItemFromBasket(id, productId) {
+  return new Promise((resolve, reject) => {
+    if (!isConnected()) {
+      return reject(new Error('Not connected to database'));
+    }
+    return db.collection(collections.baskets).updateOne(
+      { _id: ObjectId(id) },
+      { $unset: { [`items.${productId}`]: 1 } }
     ).then((data) => resolve(data))
       .catch((error) => reject(error));
   });
@@ -232,6 +245,7 @@ module.exports = {
   getProductById,
   addBasket,
   updateBasketById,
+  removeItemFromBasket,
   getBasketById,
   removeBasketById,
   addOrder,

@@ -2,25 +2,14 @@
 const assert = require('assert').strict;
 const sinon = require('sinon');
 const db = require('../src/controllers/dbController');
+const mockObjects = require('./mockObjects');
 const testData = require('./testData.json');
 
-// Stubs
-const getProductsStub = sinon.stub(db, 'getProducts');
-const getProductByIdStub = sinon.stub(db, 'getProductById');
-
-// File under test
-const { fetchProducts, fetchProduct } = require('../src/controllers/productsController');
-
 describe('GET...', () => {
-  const mockRequest = (params) => ({
-    params
-  });
-  const mockResponse = () => {
-    const res = {};
-    res.status = sinon.stub().returns(res);
-    res.json = sinon.stub().returns(res);
-    return res;
-  };
+  let getProductsStub;
+  let getProductByIdStub;
+  let fetchProducts;
+  let fetchProduct;
   let req;
   let res;
   let products;
@@ -28,14 +17,29 @@ describe('GET...', () => {
   const setUpStubs = () => {
     products = testData.products;
     getProductsStub.returns(products);
-    req = mockRequest();
-    res = mockResponse();
+    req = mockObjects.request();
+    res = mockObjects.response();
   };
 
   const resetStubs = () => {
     getProductsStub.resetHistory();
     getProductByIdStub.resetHistory();
   };
+
+  before(() => {
+    // Stubs
+    getProductsStub = sinon.stub(db, 'getProducts');
+    getProductByIdStub = sinon.stub(db, 'getProductById');
+
+    // File under test
+    ({ fetchProducts, fetchProduct } = require('../src/controllers/productsController'));
+  });
+
+  after(() => {
+    // Restore Methods
+    getProductsStub.restore();
+    getProductByIdStub.restore();
+  });
 
   describe('product list route...', () => {
     beforeEach(setUpStubs);
@@ -74,7 +78,7 @@ describe('GET...', () => {
 
     it('fails to get product with invalid id', async () => {
       getProductByIdStub.returns([]);
-      req = mockRequest({ productId: 'invalidId' });
+      req = mockObjects.request({ productId: 'invalidId' });
       await fetchProduct(req, res);
 
       assert(getProductByIdStub.calledOnce);
@@ -87,7 +91,7 @@ describe('GET...', () => {
 
     it('returns error when product list db call fails', async () => {
       getProductByIdStub.rejects();
-      req = mockRequest({ productId: 'validId' });
+      req = mockObjects.request({ productId: 'validId' });
       assert.rejects(await fetchProduct(req, res));
 
       assert(getProductByIdStub.calledOnce);
@@ -99,7 +103,7 @@ describe('GET...', () => {
 
     it('gets product with valid id', async () => {
       getProductByIdStub.returns([products[0]]);
-      req = mockRequest({ productId: 'validId' });
+      req = mockObjects.request({ productId: 'validId' });
       await fetchProduct(req, res);
 
       assert(getProductByIdStub.calledOnce);

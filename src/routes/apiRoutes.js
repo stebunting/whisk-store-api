@@ -9,8 +9,9 @@ const {
   apiGetBasket,
   apiCreateBasket,
   updateBasket,
+  removeFromBasket,
   apiDeleteBasket
-} = require('../controllers/basketController')();
+} = require('../controllers/basketController');
 const { createOrder, checkPaymentStatus, swishCallback } = require('../controllers/orderController')();
 
 function routes() {
@@ -21,9 +22,10 @@ function routes() {
   apiRoutes.route('/product/:productId').get(fetchProduct);
 
   // Routes to set up baskets
-  apiRoutes.route('/basket/:id').get(apiGetBasket);
+  apiRoutes.route('/basket/:basketId').get(apiGetBasket);
   apiRoutes.route('/basket').post(apiCreateBasket, apiGetBasket);
-  apiRoutes.route('/basket/:id').put(updateBasket, apiGetBasket);
+  apiRoutes.route('/basket/update/quantity/:basketId').put(updateBasket, apiGetBasket);
+  apiRoutes.route('/basket/update/remove/:basketId').put(removeFromBasket, apiGetBasket);
   apiRoutes.route('/basket/:basketId').delete(apiDeleteBasket, apiCreateBasket, apiGetBasket);
 
   apiRoutes.route('/order/:basketId').post(createOrder);

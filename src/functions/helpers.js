@@ -1,3 +1,6 @@
+// Requirements
+const { DateTime } = require('luxon');
+
 // Function to calculate MOMs amount from a final sale price (rounded to nearest krona)
 function calculateMoms(gross, momsRate) {
   const decimalRate = 1 + (momsRate / 100);
@@ -23,4 +26,25 @@ function priceFormat(n, userOptions = {}) {
   return str;
 }
 
-module.exports = { calculateMoms, priceFormat };
+// Parse Date Code
+function parseDateCode(code) {
+  const [weekYear, weekNumber, weekday] = code.split('-');
+  const datetime = DateTime.fromObject({ weekYear, weekNumber, weekday });
+  return {
+    datetime,
+    dateLong: datetime.toLocaleString({
+      weekday: 'long',
+      month: 'long',
+      day: '2-digit'
+    }),
+    year: parseInt(weekYear, 10),
+    week: parseInt(weekNumber, 10),
+    day: parseInt(weekday, 10)
+  };
+}
+
+module.exports = {
+  calculateMoms,
+  priceFormat,
+  parseDateCode
+};

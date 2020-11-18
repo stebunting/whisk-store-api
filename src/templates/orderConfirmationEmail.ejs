@@ -64,8 +64,8 @@
         const product = order.items[i];
         %><tr>
           <td class="item">
-            <a href="http://localhost:3000/product/<%=product.productId %>">
-              <%=product.productId %>
+            <a href="<%=storeUrl %>/product/<%=product.productId %>">
+              <%=product.name %>
             </a>
           </td>
           <td class="quantity"><%=product.quantity %></td>
@@ -73,6 +73,10 @@
           <td class="linetotal"><%=priceFormat(product.grossPrice * product.quantity) %></td>
         </tr><%
       } %>
+      <% if (order.bottomLine.totalDelivery > 0) { %><tr>
+        <td class="subtotal" colspan="3">DELIVERY</td>
+        <td class="subtotal"><%=priceFormat(order.bottomLine.totalDelivery) %></td>
+      </tr><% } %>
       <tr>
         <td class="subtotal" colspan="3">MOMs</td>
         <td class="subtotal"><%=priceFormat(order.bottomLine.totalMoms, { includeOre: true }) %></td>

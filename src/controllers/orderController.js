@@ -39,6 +39,7 @@ function orderController() {
       },
       items: basket.items.map((item) => ({
         productId: item.productId,
+        name: item.name,
         grossPrice: item.grossPrice,
         momsRate: item.momsRate,
         quantity: item.quantity
@@ -74,7 +75,6 @@ function orderController() {
   async function createOrder(req, res) {
     const { basketId } = req.params;
     const { body } = req;
-    debug(body);
 
     let basket;
     try {

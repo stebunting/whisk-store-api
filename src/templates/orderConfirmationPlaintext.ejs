@@ -3,10 +3,12 @@ Thanks for stopping by at WHISK.se! We have your order and your treats are on th
 <%='ITEM'.padEnd(30) + 'QUANTITY'.padEnd(10) + 'PRICE'.padEnd(10) + 'SUB-TOTAL' %><%
 for (let i = 0; i < order.items.length; i += 1) {
 	const product = order.items[i]; %>
-<%=product.productId.toString().padEnd(30) + product.quantity.toString().padEnd(10) + priceFormat(product.grossPrice).padEnd(10) + priceFormat(product.grossPrice * product.quantity) %><%
+<%=product.name.padEnd(30) + product.quantity.toString().padEnd(10) + priceFormat(product.grossPrice).padEnd(10) + priceFormat(product.grossPrice * product.quantity) %><%
 }
 %>
-
+<% if (order.bottomLine.totalDelivery > 0) { %>
+DELIVERY: <%=priceFormat(order.bottomLine.totalDelivery) %><%
+} %>
 MOMs: <%=priceFormat(order.bottomLine.totalMoms, { includeOre: true }) %>
 Total: <%=priceFormat(order.bottomLine.totalPrice) %>
 

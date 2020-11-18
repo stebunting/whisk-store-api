@@ -125,27 +125,42 @@ function addBasket() {
   });
 }
 
-// Update Basket
-function updateBasketById(id, productId, quantity) {
+// Update Quantity of Item in Basket
+function updateBasketById(basketId, productId, quantity) {
   return new Promise((resolve, reject) => {
     if (!isConnected()) {
       return reject(new Error('Not connected to database'));
     }
     return db.collection(collections.baskets).updateOne(
-      { _id: ObjectId(id) },
+      { _id: ObjectId(basketId) },
       { $set: { [`items.${productId}`]: quantity } }
     ).then((data) => resolve(data))
       .catch((error) => reject(error));
   });
 }
 
-function removeItemFromBasket(id, productId) {
+// Update Basket Zone
+function updateBasketZone(basketId, location) {
   return new Promise((resolve, reject) => {
     if (!isConnected()) {
       return reject(new Error('Not connected to database'));
     }
     return db.collection(collections.baskets).updateOne(
-      { _id: ObjectId(id) },
+      { _id: ObjectId(basketId) },
+      { $set: { delivery: location } }
+    ).then((data) => resolve(data))
+      .catch((error) => reject(error));
+  });
+}
+
+// Remove Item From Basket
+function removeItemFromBasket(basketId, productId) {
+  return new Promise((resolve, reject) => {
+    if (!isConnected()) {
+      return reject(new Error('Not connected to database'));
+    }
+    return db.collection(collections.baskets).updateOne(
+      { _id: ObjectId(basketId) },
       { $unset: { [`items.${productId}`]: 1 } }
     ).then((data) => resolve(data))
       .catch((error) => reject(error));
@@ -245,6 +260,7 @@ module.exports = {
   getProductById,
   addBasket,
   updateBasketById,
+  updateBasketZone,
   removeItemFromBasket,
   getBasketById,
   removeBasketById,

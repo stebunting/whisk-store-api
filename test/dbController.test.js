@@ -13,6 +13,7 @@ const {
   count,
   addBasket,
   updateBasketById,
+  removeItemFromBasket,
   getBasketById,
   removeBasketById,
   addOrder,
@@ -124,29 +125,35 @@ describe('Database testing...', () => {
       assert.strictEqual(getResponse[0].items.abcdef123456, 3);
     });
 
-    it('successfully increments item already in basket...', async () => {
+    it('successfully updates quantity of item already in basket', async () => {
       const addResponse = await addBasket();
       const { insertedId: id } = addResponse;
       await updateBasketById(id, 'abcdef123456', 3);
-      await updateBasketById(id, 'abcdef123456', 2);
+      await updateBasketById(id, 'abcdef123456', 6);
 
       const getResponse = await getBasketById(id);
       assert.strictEqual(getResponse.length, 1);
-      assert.strictEqual(getResponse[0].items.abcdef123456, 5);
+      assert.strictEqual(getResponse[0].items.abcdef123456, 6);
     });
 
-    it('successfully decrements item already in basket...', async () => {
+    it('successfully removes item from basket', async () => {
       const addResponse = await addBasket();
-      const { insertedId: id } = addResponse;
-      await updateBasketById(id, 'abcdef123456', 8);
-      await updateBasketById(id, 'abcdef123456', -4);
+      const { insertedId: basketId } = addResponse;
+      await updateBasketById(basketId, 'abcdef123456', 5);
 
-      const getResponse = await getBasketById(id);
+      const checkResponse = await getBasketById(basketId);
+      assert.strictEqual(checkResponse.length, 1);
+      assert.strictEqual(checkResponse[0].items.abcdef123456, 5);
+
+      const removeResponse = await removeItemFromBasket(basketId, 'abcdef123456');
+      assert.strictEqual(removeResponse.modifiedCount, 1);
+
+      const getResponse = await getBasketById(basketId);
       assert.strictEqual(getResponse.length, 1);
-      assert.strictEqual(getResponse[0].items.abcdef123456, 4);
+      assert.strictEqual(getResponse[0].items.abcdef123456, undefined);
     });
 
-    it('successfully removes basket...', async () => {
+    it('successfully removes basket', async () => {
       const addResponse = await addBasket();
       const { insertedId: id } = addResponse;
       let numBaskets = await count('baskets');

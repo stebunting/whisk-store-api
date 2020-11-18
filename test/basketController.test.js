@@ -5,7 +5,7 @@ const db = require('../src/controllers/dbController');
 const mockObjects = require('./mockObjects');
 const testData = require('./testData.json');
 
-describe.only('GET...', () => {
+describe.skip('GET...', () => {
   let getBasketByIdStub;
   let apiGetBasket;
   let req;

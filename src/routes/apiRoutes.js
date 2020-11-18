@@ -9,6 +9,7 @@ const {
   apiGetBasket,
   apiCreateBasket,
   updateBasket,
+  updateZoneBasket,
   removeFromBasket,
   apiDeleteBasket
 } = require('../controllers/basketController');
@@ -24,6 +25,7 @@ function routes() {
   // Routes to set up baskets
   apiRoutes.route('/basket/:basketId').get(apiGetBasket);
   apiRoutes.route('/basket').post(apiCreateBasket, apiGetBasket);
+  apiRoutes.route('/basket/update/zone/:basketId').put(updateZoneBasket, apiGetBasket);
   apiRoutes.route('/basket/update/quantity/:basketId').put(updateBasket, apiGetBasket);
   apiRoutes.route('/basket/update/remove/:basketId').put(removeFromBasket, apiGetBasket);
   apiRoutes.route('/basket/:basketId').delete(apiDeleteBasket, apiCreateBasket, apiGetBasket);

@@ -87,7 +87,10 @@ async function sendConfirmationEmail(order, deliveryDate) {
     html
   };
 
-  return sendEmail(emailConfig);
+  const response = await sendEmail(emailConfig);
+  const correctResponse = response.response.substr(0, 6) === '250 OK';
+  const containsEmailAddress = response.accepted.includes(order.details.email);
+  return correctResponse && containsEmailAddress;
 }
 
 module.exports = { isConnected, connect, sendConfirmationEmail };

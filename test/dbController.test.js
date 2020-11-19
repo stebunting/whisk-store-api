@@ -19,7 +19,8 @@ const {
   addOrder,
   getOrderById,
   getSwishStatus,
-  updateSwishPayment
+  updateSwishPayment,
+  updateOrder
 } = require('../src/controllers/dbController');
 
 describe('Database testing...', () => {
@@ -185,6 +186,19 @@ describe('Database testing...', () => {
       const getResponse = await getOrderById(insertedId);
       assert.strictEqual(getResponse.length, 1);
       assert.deepStrictEqual(getResponse[0], order);
+    });
+
+    it('successfully updates an order', async () => {
+      const order = orders[0];
+      const addResponse = await addOrder(order);
+      const { insertedId } = addResponse;
+
+      const response = await updateOrder(insertedId, { 'payment.confirmationEmailSent': true });
+      assert.strictEqual(response.modifiedCount, 1);
+
+      const getResponse = await getOrderById(insertedId);
+      assert.strictEqual(getResponse.length, 1);
+      assert(getResponse[0].payment.confirmationEmailSent);
     });
 
     it('successfully updates order payment status', async () => {

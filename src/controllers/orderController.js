@@ -10,7 +10,9 @@ const {
   removeBasketById,
   addOrder,
   getSwishStatus,
-  updateSwishPayment
+  updateSwishPayment,
+  updateOrder,
+  getOrderById
 } = require('./dbController');
 const { sendConfirmationEmail } = require('./emailController');
 const status = require('./orderStatuses');
@@ -47,7 +49,8 @@ function orderController() {
       bottomLine: basket.statement.bottomLine,
       payment: {
         method: orderBody.paymentMethod,
-        status: status.NOT_ORDERED
+        status: status.NOT_ORDERED,
+        confirmationEmailSent: false
       }
     };
 
@@ -91,12 +94,17 @@ function orderController() {
     // Payment Link
     if (order.payment.method === 'paymentLink') {
       order.payment.status = status.CREATED;
-      await Promise.allSettled([
-        addOrder(order),
-        removeBasketById(basketId)
-      ]);
+      removeBasketById(basketId);
 
-      sendConfirmationEmail(order, friendlyDate);
+      addOrder(order)
+        .then((response) => {
+          const { insertedId: orderId } = response;
+          return sendConfirmationEmail(order, friendlyDate)
+            .then((emailSent) => updateOrder(
+              orderId,
+              { 'payment.confirmationEmailSent': emailSent }
+            ));
+        });
 
       return res.json({
         status: 'ok',
@@ -110,26 +118,29 @@ function orderController() {
     // Swish Payment
     if (order.payment.method === 'swish') {
       try {
+        const orderResponse = await addOrder(order);
+        const { insertedId: orderId } = orderResponse;
+
         const response = await swish.createPaymentRequest({
           phoneNumber: order.details.telephone,
           amount: priceFormat(order.bottomLine.totalPrice, { includeSymbol: false }),
-          message: 'BE18'
+          payeePaymentReference: orderId.toString(),
+          message: ''
         });
         const { id: swishId } = response;
-        order.payment = {
-          ...order.payment,
-          status: status.CREATED,
-          swish: {
+
+        await updateOrder(orderId, {
+          'payment.status': status.CREATED,
+          'payment.swish': {
             id: swishId,
             status: status.CREATED
           }
-        };
-        await addOrder(order);
+        });
 
         return res.json({
           status: 'ok',
           order: {
-            status: order.payment.status,
+            status: status.CREATED,
             id: swishId,
             paymentMethod: order.payment.payment
           }
@@ -160,10 +171,26 @@ function orderController() {
     });
   }
 
-  function swishCallback(req, res) {
+  // Swish Callback Function
+  async function swishCallback(req, res) {
     const { body } = req;
-    updateSwishPayment(body);
-    return res.json({ status: 'thanks very much' });
+    const { payeePaymentReference: orderId } = body;
+
+    updateSwishPayment(body)
+      .then(() => getOrderById(orderId)
+        .then(([order]) => {
+          const friendlyDate = '2020-49-3';
+          if (body.status === 'PAID' && !order.payment.confirmationEmailSent) {
+            return sendConfirmationEmail(order, friendlyDate)
+              .then((emailSent) => updateOrder(
+                orderId,
+                { 'payment.confirmationEmailSent': emailSent }
+              ));
+          }
+          return true;
+        }))
+      .catch((error) => debug(error));
+    return res.status(200).json({ status: 'thanks very much' });
   }
 
   return {

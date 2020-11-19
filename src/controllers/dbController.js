@@ -206,6 +206,21 @@ function addOrder(order) {
   });
 }
 
+// Update an order
+function updateOrder(orderId, query) {
+  return new Promise((resolve, reject) => {
+    if (!isConnected()) {
+      return reject(new Error('Not connected to database'));
+    }
+    return db.collection(collections.orders).updateOne(
+      { _id: ObjectId(orderId) },
+      { $set: query }
+    )
+      .then((data) => resolve(data))
+      .catch((error) => reject(error));
+  });
+}
+
 // Get Order from DB
 function getOrderById(id) {
   return new Promise((resolve, reject) => {
@@ -265,6 +280,7 @@ module.exports = {
   getBasketById,
   removeBasketById,
   addOrder,
+  updateOrder,
   getOrderById,
   getSwishStatus,
   updateSwishPayment

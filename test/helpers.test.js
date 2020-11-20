@@ -40,23 +40,31 @@ describe('Helper Functions...', () => {
     });
   });
 
-  describe('parse date code...', () => {
+  describe.only('parse date code...', () => {
     it('parse date code (YEAR-WEEK-DAYOFWEEK) into components', () => {
       let parsedCode = parseDateCode('2017-24-5');
       assert.strictEqual(parsedCode.year, 2017);
       assert.strictEqual(parsedCode.week, 24);
       assert.strictEqual(parsedCode.day, 5);
-      assert.strictEqual(parsedCode.datetime.toISO(), '2017-06-16T00:00:00.000+02:00');
+      assert.deepStrictEqual(parsedCode.datetime.c, {
+        day: 16,
+        hour: 0,
+        millisecond: 0,
+        minute: 0,
+        month: 6,
+        second: 0,
+        year: 2017
+      });
       assert.strictEqual(parsedCode.dateLong, 'Friday, 16 June');
       parsedCode = parseDateCode('2003-2-2');
       assert.strictEqual(parsedCode.year, 2003);
       assert.strictEqual(parsedCode.week, 2);
       assert.strictEqual(parsedCode.day, 2);
-      assert.strictEqual(parsedCode.datetime.toISO(), '2003-01-07T00:00:00.000+01:00');
+      assert.strictEqual(parsedCode.datetime.toISO().substring(0, 23), '2003-01-07T00:00:00.000');
       assert.strictEqual(parsedCode.dateLong, 'Tuesday, 07 January');
       assert.strictEqual(parseDateCode('2006-65-6').datetime.toISO(), null);
       assert.strictEqual(parseDateCode('2009-0-7').datetime.toISO(), null);
-      assert.strictEqual(parseDateCode('2013-1-1').datetime.toISO(), '2012-12-31T00:00:00.000+01:00');
+      assert.strictEqual(parseDateCode('2013-1-1').datetime.toISO().substring(0, 23), '2012-12-31T00:00:00.000');
     });
   });
 });

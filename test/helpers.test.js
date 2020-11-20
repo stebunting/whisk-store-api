@@ -40,7 +40,7 @@ describe('Helper Functions...', () => {
     });
   });
 
-  describe.only('parse date code...', () => {
+  describe.skip('parse date code...', () => {
     it('parse date code (YEAR-WEEK-DAYOFWEEK) into components', () => {
       let parsedCode = parseDateCode('2017-24-5');
       assert.strictEqual(parsedCode.year, 2017);

@@ -33,6 +33,7 @@ function getDelivery(zone, items) {
   if (items.length === 0 || zone < 0 || zone > 2) {
     return 0;
   }
+  debug(zone);
   const minCostDetails = items.reduce((minimum, item) => {
     const details = item.delivery.costs[zone];
     if (details.price < minimum.price) return details;
@@ -97,7 +98,8 @@ async function apiGetBasket(req, res) {
       status: 'ok',
       basket
     });
-  } catch {
+  } catch (error) {
+    debug(error);
     const newBasketId = await createBasket();
     const basket = await getBasket(newBasketId);
     return res.status(200).json({
@@ -118,6 +120,8 @@ async function apiCreateBasket(req, res, next) {
 async function updateBasket(req, res, next) {
   const { basketId } = req.params;
   const { body } = req;
+  debug(basketId);
+  debug(body);
 
   await updateBasketById(basketId, body.productId, parseInt(body.quantity, 10));
   next();

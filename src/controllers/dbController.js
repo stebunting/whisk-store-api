@@ -113,7 +113,10 @@ function count(collection) {
 function addBasket() {
   const newBasket = {
     items: {},
-    delivery: {}
+    delivery: {
+      zone: -1,
+      address: ''
+    }
   };
   return new Promise((resolve, reject) => {
     if (!isConnected()) {

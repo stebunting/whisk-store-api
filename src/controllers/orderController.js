@@ -7,7 +7,6 @@ const debug = require('debug')(tag);
 const { priceFormat } = require('../functions/helpers');
 const { getBasket } = require('./basketController');
 const {
-  removeBasketById,
   addOrder,
   getSwishStatus,
   updateSwishPayment,
@@ -21,11 +20,8 @@ const swish = new Swish({
   alias: process.env.SWISH_ALIAS,
   paymentRequestCallback: `${process.env.SWISH_CALLBACK}/api/order/swish/callback`,
   cert: JSON.parse(`"${process.env.SWISH_CERT}"`),
-  key: JSON.parse(`"${process.env.SWISH_KEY}"`),
-  ca: JSON.parse(`"${process.env.SWISH_CA}"`),
-  password: 'swish'
+  key: JSON.parse(`"${process.env.SWISH_KEY}"`)
 });
-swish.url = 'https://mss.cpc.getswish.net/swish-cpcapi';
 
 function orderController() {
   function parseOrder(orderBody, basket) {
@@ -94,8 +90,6 @@ function orderController() {
     // Payment Link
     if (order.payment.method === 'paymentLink') {
       order.payment.status = status.CREATED;
-      removeBasketById(basketId);
-
       addOrder(order)
         .then((response) => {
           const { insertedId: orderId } = response;

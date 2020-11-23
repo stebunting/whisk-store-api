@@ -112,7 +112,7 @@ function count(collection) {
 // Create New Basket
 function addBasket() {
   const newBasket = {
-    items: {},
+    items: [],
     delivery: {
       zone: -1,
       address: ''
@@ -129,15 +129,27 @@ function addBasket() {
 }
 
 // Update Quantity of Item in Basket
-function updateBasketById(basketId, productId, quantity) {
+function updateBasketById(basketId, payload) {
   return new Promise((resolve, reject) => {
     if (!isConnected()) {
       return reject(new Error('Not connected to database'));
     }
     return db.collection(collections.baskets).updateOne(
       { _id: ObjectId(basketId) },
-      { $set: { [`items.${productId}`]: quantity } }
-    ).then((data) => resolve(data))
+      {
+        $pull: {
+          items: {
+            productId: payload.productId,
+            deliveryType: payload.deliveryType,
+            deliveryDate: payload.deliveryDate
+          }
+        }
+      },
+      { multi: true }
+    ).then(() => db.collection(collections.baskets).updateOne(
+      { _id: ObjectId(basketId) },
+      { $push: { items: payload } }
+    )).then((data) => resolve(data))
       .catch((error) => reject(error));
   });
 }

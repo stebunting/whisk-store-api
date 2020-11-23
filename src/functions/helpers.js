@@ -28,18 +28,22 @@ function priceFormat(n, userOptions = {}) {
 
 // Parse Date Code
 function parseDateCode(code) {
-  const [weekYear, weekNumber, weekday] = code.split('-');
+  const [weekYear, weekNumber, weekday, startTime, endTime] = code.split('-');
   const datetime = DateTime.fromObject({ weekYear, weekNumber, weekday });
+  const dateLong = datetime.toLocaleString({
+    weekday: 'long',
+    month: 'long',
+    day: '2-digit'
+  });
   return {
     datetime,
-    dateLong: datetime.toLocaleString({
-      weekday: 'long',
-      month: 'long',
-      day: '2-digit'
-    }),
+    dateLong,
     year: parseInt(weekYear, 10),
     week: parseInt(weekNumber, 10),
-    day: parseInt(weekday, 10)
+    day: parseInt(weekday, 10),
+    startTime,
+    endTime,
+    range: `${dateLong} (${startTime} - ${endTime})`
   };
 }
 

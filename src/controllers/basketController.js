@@ -12,73 +12,102 @@ const {
   updateBasketZone
 } = require('./dbController');
 const { getProductById } = require('./dbController');
-const { calculateMoms } = require('../functions/helpers');
+const { calculateMoms, parseDateCode } = require('../functions/helpers');
 
 // Method to get a statement from a baskets items
 function getStatement(items, delivery) {
-  const deliveryMoms = calculateMoms(delivery.price, delivery.momsRate) || 0;
+  const deliveryMoms = calculateMoms(delivery.deliveryTotal, delivery.momsRate) || 0;
   const bottomLine = items.reduce((acc, next) => ({
     ...acc,
     totalMoms: acc.totalMoms + calculateMoms(next.quantity * next.grossPrice, next.momsRate),
     totalPrice: acc.totalDelivery + acc.totalPrice + next.linePrice
   }), {
-    totalDelivery: delivery.price || 0,
+    totalDelivery: delivery.deliveryTotal || 0,
     totalMoms: deliveryMoms,
     totalPrice: 0
   });
   return { bottomLine };
 }
 
-function getDelivery(zone, items) {
-  if (items.length === 0 || zone < 0 || zone > 2) {
-    return 0;
-  }
-  debug(zone);
-  const minCostDetails = items.reduce((minimum, item) => {
-    const details = item.delivery.costs[zone];
-    if (details.price < minimum.price) return details;
-    return minimum;
-  }, items[0].delivery.costs[zone]);
-  return minCostDetails;
-}
-
 async function getBasket(basketId) {
   const [basket] = await getBasketById(basketId);
-  if (basket.length < 1) throw new Error();
+  if (!basket || basket.length < 1) throw new Error();
 
-  const response = await Promise.allSettled(
-    Object.keys(basket.items).map((key) => getProductById(key))
+  const products = await Promise.allSettled(
+    basket.items.map((item) => getProductById(item.productId))
   );
-  const items = response.map((item) => {
-    if (item.status === 'fulfilled') {
-      const [{ _id: productId, ...details }] = item.value;
-      const quantity = basket.items[productId];
-      return {
-        productId,
-        ...details,
-        quantity,
-        linePrice: details.grossPrice * quantity
-      };
+
+  const delivery = {};
+  const items = basket.items.map((item, index) => {
+    const response = products[index];
+    if (response.status !== 'fulfilled' || response.value.length < 1) {
+      return item;
     }
-    return {};
+    const [product] = response.value;
+
+    // Delivery
+    const { year, week, day } = parseDateCode(item.deliveryDate);
+    const code = `${year}-${week}-${day}`;
+    if (item.deliveryType === 'delivery') {
+      if (!delivery[code]) {
+        delivery[code] = {
+          products: [],
+          maxZone: 0,
+          deliverable: true
+        };
+      }
+      delivery[code].products.push({
+        productId: item.productId,
+        quantity: item.quantity,
+        deliveryCost: product.delivery.costs[basket.delivery.zone]
+          ? product.delivery.costs[basket.delivery.zone].price
+          : 0
+      });
+      delivery[code].maxZone = Math.max(product.delivery.maxZone, delivery[code].maxZone);
+      delivery[code].deliverable = delivery[code].deliverable
+        && product.delivery.maxZone >= basket.delivery.zone;
+    }
+
+    return {
+      ...item,
+      linePrice: item.quantity * product.grossPrice,
+      momsRate: product.momsRate,
+      grossPrice: product.grossPrice
+    };
   });
 
-  const deliverable = basket.delivery.zone >= 0
-    && items.reduce((acc, item) => (
-      acc && basket.delivery.zone <= item.delivery.maxZone
-    ), true);
+  // Get cost for each days delivery
+  let deliveryTotal = 0;
+  const deliveryDetails = Object.keys(delivery).reduce((acc, date) => {
+    const info = delivery[date];
+    const total = info.products.reduce((minimum, product) => {
+      if (product.deliveryCost < minimum) return product.deliveryCost;
+      return minimum;
+    }, info.products[0].deliveryCost);
+    acc[date] = {
+      ...info,
+      momsRate: 25,
+      total
+    };
+    deliveryTotal += total;
+    return acc;
+  }, {});
 
-  const delivery = {
+  const deliveryObject = {
     ...basket.delivery,
-    ...getDelivery(basket.delivery.zone, items),
-    deliverable
+    details: deliveryDetails,
+    deliverable: Object.keys(delivery).length > 0
+      && Object.keys(delivery).reduce((acc, key) => acc && delivery[key].deliverable),
+    momsRate: 25,
+    deliveryTotal,
   };
 
   return {
+    ...basket,
     basketId: basket._id,
     items,
-    delivery,
-    statement: getStatement(items, delivery)
+    delivery: deliveryObject,
+    statement: getStatement(items, deliveryObject)
   };
 }
 
@@ -99,7 +128,6 @@ async function apiGetBasket(req, res) {
       basket
     });
   } catch (error) {
-    debug(error);
     const newBasketId = await createBasket();
     const basket = await getBasket(newBasketId);
     return res.status(200).json({
@@ -120,10 +148,8 @@ async function apiCreateBasket(req, res, next) {
 async function updateBasket(req, res, next) {
   const { basketId } = req.params;
   const { body } = req;
-  debug(basketId);
-  debug(body);
 
-  await updateBasketById(basketId, body.productId, parseInt(body.quantity, 10));
+  await updateBasketById(basketId, body);
   next();
 }
 

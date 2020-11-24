@@ -38,6 +38,7 @@ async function getBasket(basketId) {
   );
 
   const delivery = {};
+  let allCollections = true;
   const items = basket.items.map((item, index) => {
     const response = products[index];
     if (response.status !== 'fulfilled' || response.value.length < 1) {
@@ -67,9 +68,11 @@ async function getBasket(basketId) {
       delivery[code].deliverable = delivery[code].deliverable
         && product.delivery.maxZone >= basket.delivery.zone;
     }
+    allCollections = allCollections && item.deliveryType === 'collection';
 
     return {
       ...item,
+      details: product,
       linePrice: item.quantity * product.grossPrice,
       momsRate: product.momsRate,
       grossPrice: product.grossPrice
@@ -95,9 +98,10 @@ async function getBasket(basketId) {
 
   const deliveryObject = {
     ...basket.delivery,
+    allCollections,
     details: deliveryDetails,
     deliverable: Object.keys(delivery).length > 0
-      && Object.keys(delivery).reduce((acc, key) => acc && delivery[key].deliverable),
+      && Object.keys(delivery).reduce((acc, key) => acc && delivery[key].deliverable, true),
     momsRate: 25,
     deliveryTotal,
   };

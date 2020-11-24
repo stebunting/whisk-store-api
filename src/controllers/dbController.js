@@ -136,20 +136,8 @@ function updateBasketById(basketId, payload) {
     }
     return db.collection(collections.baskets).updateOne(
       { _id: ObjectId(basketId) },
-      {
-        $pull: {
-          items: {
-            productId: payload.productId,
-            deliveryType: payload.deliveryType,
-            deliveryDate: payload.deliveryDate
-          }
-        }
-      },
-      { multi: true }
-    ).then(() => db.collection(collections.baskets).updateOne(
-      { _id: ObjectId(basketId) },
       { $push: { items: payload } }
-    )).then((data) => resolve(data))
+    ).then((data) => resolve(data))
       .catch((error) => reject(error));
   });
 }
@@ -169,14 +157,23 @@ function updateBasketZone(basketId, location) {
 }
 
 // Remove Item From Basket
-function removeItemFromBasket(basketId, productId) {
+function removeItemFromBasket(basketId, payload) {
   return new Promise((resolve, reject) => {
     if (!isConnected()) {
       return reject(new Error('Not connected to database'));
     }
     return db.collection(collections.baskets).updateOne(
       { _id: ObjectId(basketId) },
-      { $unset: { [`items.${productId}`]: 1 } }
+      {
+        $pull: {
+          items: {
+            productId: payload.productId,
+            deliveryType: payload.deliveryType,
+            deliveryDate: payload.deliveryDate
+          }
+        }
+      },
+      { multi: true }
     ).then((data) => resolve(data))
       .catch((error) => reject(error));
   });

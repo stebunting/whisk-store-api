@@ -149,6 +149,7 @@ async function updateBasket(req, res, next) {
   const { basketId } = req.params;
   const { body } = req;
 
+  await removeItemFromBasket(basketId, body);
   await updateBasketById(basketId, body);
   next();
 }
@@ -166,7 +167,7 @@ async function removeFromBasket(req, res, next) {
   const { basketId } = req.params;
   const { body } = req;
 
-  await removeItemFromBasket(basketId, body.productId);
+  await removeItemFromBasket(basketId, body);
   next();
 }
 

@@ -32,7 +32,7 @@ function getStatement(items, delivery) {
 async function getBasket(basketId) {
   const [basket] = await getBasketById(basketId);
   if (!basket || basket.length < 1) throw new Error();
-
+  
   const products = await Promise.allSettled(
     basket.items.map((item) => getProductById(item.productId))
   );
@@ -47,9 +47,9 @@ async function getBasket(basketId) {
     const [product] = response.value;
 
     // Delivery
-    const { year, month, date } = parseDateCode(item.deliveryDate);
-    const code = `${year}-${month}-${date}`;
     if (item.deliveryType === 'delivery') {
+      const { year, month, date } = parseDateCode(item.deliveryDate);
+      const code = `${year}-${month}-${date}`;
       if (!delivery[code]) {
         delivery[code] = {
           products: [],
@@ -114,7 +114,6 @@ async function getBasket(basketId) {
     delivery: deliveryObject,
     statement: getStatement(items, deliveryObject)
   };
-  debug(b);
   return b;
 }
 

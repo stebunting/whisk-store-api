@@ -66,7 +66,8 @@
               <%=product.name %>
             </a>
             <div>
-              <%=capitaliseFirst(product.deliveryType) %> // <%=parseDateCode(product.deliveryDate).range %>
+              <%=capitaliseFirst(product.deliveryType) %>
+              <% if (product.deliveryDate !== '') { %> // <%=parseDateCode(product.deliveryDate).range %><% } %>
             </div>
           </td>
           <td class="quantity"><%=product.quantity %></td>

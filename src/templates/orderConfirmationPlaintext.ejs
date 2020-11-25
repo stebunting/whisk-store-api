@@ -4,7 +4,7 @@ Thanks for stopping by at WHISK.se! We have your order and your treats are on th
 for (let i = 0; i < order.items.length; i += 1) {
 	const product = order.items[i]; %>
 <%=product.name.padEnd(50) + product.quantity.toString().padEnd(10) + priceFormat(product.grossPrice).padEnd(10) + priceFormat(product.grossPrice * product.quantity) %>
-<%=`${capitaliseFirst(product.deliveryType)} // ${parseDateCode(product.deliveryDate).range}`%><%
+<%=capitaliseFirst(product.deliveryType) %><% if (product.deliveryDate !== '') { %> // <%=parseDateCode(product.deliveryDate).range %><% } %>
 }
 for (let i = 0; i < order.delivery.length; i += 1) {
 	const delivery = order.delivery[i]; %>

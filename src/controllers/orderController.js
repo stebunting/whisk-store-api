@@ -29,7 +29,8 @@ function orderController() {
       details: {
         name: orderBody.name,
         email: orderBody.email,
-        telephone: orderBody.telephone
+        telephone: orderBody.telephone,
+        notes: orderBody.notes
       },
       delivery: Object.keys(basket.delivery.details).map((key) => ({
         date: key,

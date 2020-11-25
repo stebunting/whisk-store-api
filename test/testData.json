@@ -14,48 +14,53 @@
     "details": {
       "name": "ste",
       "email": "stebunting@gmail.com",
-      "telephone": "07378978497324"
+      "telephone": "07378978497324",
+      "notes": ""
     },
-    "delivery": {
-      "type": "collection",
-      "date": "2020-50-2"
-    },
+    "delivery": [],
     "items": [
       {
         "productId": "5faafded3dcb1ac5af67870e",
+        "name" : "Whisk Christmas Hamper",
         "grossPrice": 45000,
         "momsRate": 12,
-        "quantity": 2
+        "quantity": 2,
+        "deliveryType" : "collection",
+        "deliveryDate" : "2020-12-4-10:00-11:30"
       }
     ],
     "bottomLine": {
+      "totalDelivery" : 0,
       "totalMoms": 4821,
       "totalPrice": 90000 },
     "payment": {
       "method": "swish",
       "swish": {
         "id": "834AA1CE6D784D309CCB97D2D3EE7307"
-      }
+      },
+      "confirmationEmailSent": false
     }
   }, {
     "details" : {
       "name" : "ste",
       "email" : "stebunting@gmail.com",
-      "telephone" : "0733283460"
+      "telephone" : "07837897234",
+      "notes": ""
     },
-    "delivery" : {
-      "type" : "collection",
-      "date" : "2020-50-2"
-    },
+    "delivery" : [],
     "items" : [
       {
         "productId" : "5faafded3dcb1ac5af67870e",
+        "name" : "Whisk Christmas Hamper",
         "grossPrice" : 45000,
         "momsRate" : 12,
-        "quantity" : 2
+        "quantity" : 2,
+        "type" : "collection",
+        "date" : "2020-12-4-10:00-11:30"
       }
     ],
     "bottomLine" : {
+      "totalDelivery": 0,
       "totalMoms" : 4821,
       "totalPrice" : 90000
     },
@@ -63,7 +68,8 @@
       "method" : "swish",
       "swish" : {
         "id" : "F3630DCD06F247DE8E62A9E5927F4ACC"
-      }
+      },
+      "confirmationEmailSent": false
     }
   }],
   "swishPayments": [{

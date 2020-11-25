@@ -70,26 +70,20 @@ function getCursor(collection) {
 
 // Add New Product
 function addProduct(product) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.products).insertOne(product)
+  return new Promise((resolve, reject) => (
+    db.collection(collections.products).insertOne(product)
       .then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Get Products from DB
 function getProducts(query = {}) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.products).find(query).toArray()
+  return new Promise((resolve, reject) => (
+    db.collection(collections.products).find(query).toArray()
       .then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Get Products from DB
@@ -99,14 +93,11 @@ function getProductById(id) {
 
 // Get Number of Products
 function count(collection) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections[collection]).countDocuments()
+  return new Promise((resolve, reject) => (
+    db.collection(collections[collection]).countDocuments()
       .then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Create New Basket
@@ -118,51 +109,39 @@ function addBasket() {
       address: ''
     }
   };
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.baskets).insertOne(newBasket)
+  return new Promise((resolve, reject) => (
+    db.collection(collections.baskets).insertOne(newBasket)
       .then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Update Quantity of Item in Basket
 function updateBasketById(basketId, payload) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.baskets).updateOne(
+  return new Promise((resolve, reject) => (
+    db.collection(collections.baskets).updateOne(
       { _id: ObjectId(basketId) },
       { $push: { items: payload } }
     ).then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Update Basket Zone
 function updateBasketZone(basketId, location) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.baskets).updateOne(
+  return new Promise((resolve, reject) => (
+    db.collection(collections.baskets).updateOne(
       { _id: ObjectId(basketId) },
       { $set: { delivery: location } }
     ).then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Remove Item From Basket
 function removeItemFromBasket(basketId, payload) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.baskets).updateOne(
+  return new Promise((resolve, reject) => (
+    db.collection(collections.baskets).updateOne(
       { _id: ObjectId(basketId) },
       {
         $pull: {
@@ -175,104 +154,83 @@ function removeItemFromBasket(basketId, payload) {
       },
       { multi: true }
     ).then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Get Basket from DB
 function getBasketById(id) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.baskets).find({
+  return new Promise((resolve, reject) => (
+    db.collection(collections.baskets).find({
       _id: ObjectId(id)
     }).toArray()
       .then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Get Basket from DB
 function removeBasketById(id) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.baskets).deleteOne({
+  return new Promise((resolve, reject) => (
+    db.collection(collections.baskets).deleteOne({
       _id: ObjectId(id)
     }).then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Create New Order
 function addOrder(order) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.orders).insertOne(order)
+  return new Promise((resolve, reject) => (
+    db.collection(collections.orders).insertOne(order)
       .then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Update an order
 function updateOrder(orderId, query) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.orders).updateOne(
+  return new Promise((resolve, reject) => (
+    db.collection(collections.orders).updateOne(
       { _id: ObjectId(orderId) },
       { $set: query }
     )
       .then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Get Order from DB
 function getOrderById(id) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.orders).find({
+  return new Promise((resolve, reject) => (
+    db.collection(collections.orders).find({
       _id: ObjectId(id)
     }).toArray()
       .then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Check Swish Status
 function getSwishStatus(swishId) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.orders).find(
+  return new Promise((resolve, reject) => (
+    db.collection(collections.orders).find(
       { 'payment.swish.id': swishId }
     ).toArray()
       .then((data) => resolve(data.map((payment) => payment.payment.swish)))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 // Update payment details
 function updateSwishPayment(payment) {
-  return new Promise((resolve, reject) => {
-    if (!isConnected()) {
-      return reject(new Error('Not connected to database'));
-    }
-    return db.collection(collections.orders).updateOne(
+  return new Promise((resolve, reject) => (
+    db.collection(collections.orders).updateOne(
       { 'payment.swish.id': payment.id },
       { $set: { 'payment.swish': payment } }
     ).then((data) => resolve(data))
-      .catch((error) => reject(error));
-  });
+      .catch((error) => reject(error))
+  ));
 }
 
 module.exports = {

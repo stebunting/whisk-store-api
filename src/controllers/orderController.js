@@ -93,19 +93,20 @@ function orderController() {
     // Payment Link
     if (order.payment.method === 'paymentLink') {
       order.payment.status = status.CREATED;
-      addOrder(order)
-        .then((response) => {
-          const { insertedId: orderId } = response;
-          return sendConfirmationEmail(order)
-            .then((emailSent) => updateOrder(
-              orderId,
-              { 'payment.confirmationEmailSent': emailSent }
-            ));
-        });
+
+      const response = await addOrder(order);
+      const { insertedId: orderId } = response;
+
+      sendConfirmationEmail(order)
+        .then((emailSent) => updateOrder(
+          orderId,
+          { 'payment.confirmationEmailSent': emailSent }
+        ));
 
       return res.json({
         status: 'ok',
         order: {
+          orderId,
           status: status.PAID,
           paymentMethod: order.payment.method,
         }

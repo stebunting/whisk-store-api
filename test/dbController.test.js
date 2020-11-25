@@ -95,7 +95,7 @@ describe('Database testing...', () => {
     });
   });
 
-  describe.skip('Baskets...', () => {
+  describe('Baskets...', () => {
     beforeEach(setupTest);
 
     it('successfully creates empty basket...', async () => {
@@ -116,47 +116,74 @@ describe('Database testing...', () => {
 
     it('successfully adds item to basket...', async () => {
       const addResponse = await addBasket();
-      const { insertedId: id } = addResponse;
+      const { insertedId: basketId } = addResponse;
 
-      const updateResponse = await updateBasketById({
+      const updateResponse = await updateBasketById(basketId, {
         productId: 'abcdef123456',
         quantity: 3,
         deliveryType: 'collection',
-        deliveryDate: '2020-50-2'
+        deliveryDate: '2020-12-2'
       });
       assert.strictEqual(updateResponse.modifiedCount, 1);
 
-      const getResponse = await getBasketById(id);
+      const getResponse = await getBasketById(basketId);
       assert.strictEqual(getResponse.length, 1);
+      assert.strictEqual(getResponse[0].items[0].productId, 'abcdef123456');
       assert.strictEqual(getResponse[0].items[0].quantity, 3);
-    });
-
-    it('successfully updates quantity of item already in basket', async () => {
-      const addResponse = await addBasket();
-      const { insertedId: id } = addResponse;
-      await updateBasketById(id, 'abcdef123456', 3);
-      await updateBasketById(id, 'abcdef123456', 6);
-
-      const getResponse = await getBasketById(id);
-      assert.strictEqual(getResponse.length, 1);
-      assert.strictEqual(getResponse[0].items.abcdef123456, 6);
+      assert.strictEqual(getResponse[0].items[0].deliveryType, 'collection');
+      assert.strictEqual(getResponse[0].items[0].deliveryDate, '2020-12-2');
     });
 
     it('successfully removes item from basket', async () => {
       const addResponse = await addBasket();
       const { insertedId: basketId } = addResponse;
-      await updateBasketById(basketId, 'abcdef123456', 5);
+      await updateBasketById(basketId, {
+        productId: 'abcdef123456',
+        quantity: 5,
+        deliveryType: 'collection',
+        deliveryDate: '2020-12-2'
+      });
 
       const checkResponse = await getBasketById(basketId);
       assert.strictEqual(checkResponse.length, 1);
-      assert.strictEqual(checkResponse[0].items.abcdef123456, 5);
+      assert.strictEqual(checkResponse[0].items[0].quantity, 5);
 
-      const removeResponse = await removeItemFromBasket(basketId, 'abcdef123456');
+      const removeResponse = await removeItemFromBasket(basketId, {
+        productId: 'abcdef123456',
+        deliveryType: 'collection',
+        deliveryDate: '2020-12-2'
+      });
       assert.strictEqual(removeResponse.modifiedCount, 1);
 
       const getResponse = await getBasketById(basketId);
       assert.strictEqual(getResponse.length, 1);
-      assert.strictEqual(getResponse[0].items.abcdef123456, undefined);
+      assert.strictEqual(getResponse[0].items.length, 0);
+    });
+
+    it('successfully updates quantity of item already in basket', async () => {
+      const addResponse = await addBasket();
+      const { insertedId: basketId } = addResponse;
+      await updateBasketById(basketId, {
+        productId: 'abcdef123456',
+        deliveryType: 'collection',
+        deliveryDate: '2020-12-2',
+        quantity: 3
+      });
+      await removeItemFromBasket(basketId, {
+        productId: 'abcdef123456',
+        deliveryType: 'collection',
+        deliveryDate: '2020-12-2'
+      });
+      await updateBasketById(basketId, {
+        productId: 'abcdef123456',
+        deliveryType: 'collection',
+        deliveryDate: '2020-12-2',
+        quantity: 6
+      });
+
+      const getResponse = await getBasketById(basketId);
+      assert.strictEqual(getResponse.length, 1);
+      assert.strictEqual(getResponse[0].items[0].quantity, 6);
     });
 
     it('successfully removes basket', async () => {

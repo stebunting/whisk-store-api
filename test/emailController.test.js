@@ -3,7 +3,7 @@ const assert = require('assert').strict;
 const { isConnected, connect, sendConfirmationEmail } = require('../src/controllers/emailController');
 const testData = require('./testData.json');
 
-describe('E-Mailer...', () => {
+describe.only('E-Mailer...', () => {
   let orders;
 
   const setUpTestData = () => {

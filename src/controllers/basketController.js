@@ -47,8 +47,8 @@ async function getBasket(basketId) {
     const [product] = response.value;
 
     // Delivery
-    const { year, week, day } = parseDateCode(item.deliveryDate);
-    const code = `${year}-${week}-${day}`;
+    const { year, month, date } = parseDateCode(item.deliveryDate);
+    const code = `${year}-${month}-${date}`;
     if (item.deliveryType === 'delivery') {
       if (!delivery[code]) {
         delivery[code] = {
@@ -72,6 +72,7 @@ async function getBasket(basketId) {
 
     return {
       ...item,
+      name: product.name,
       details: product,
       linePrice: item.quantity * product.grossPrice,
       momsRate: product.momsRate,
@@ -106,13 +107,15 @@ async function getBasket(basketId) {
     deliveryTotal,
   };
 
-  return {
+  const b = {
     ...basket,
     basketId: basket._id,
     items,
     delivery: deliveryObject,
     statement: getStatement(items, deliveryObject)
   };
+  debug(b);
+  return b;
 }
 
 async function createBasket() {

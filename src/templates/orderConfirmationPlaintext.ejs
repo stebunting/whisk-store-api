@@ -1,9 +1,14 @@
 Thanks for stopping by at WHISK.se! We have your order and your treats are on their way.
 
-<%='ITEM'.padEnd(30) + 'QUANTITY'.padEnd(10) + 'PRICE'.padEnd(10) + 'SUB-TOTAL' %><%
+<%='ITEM'.padEnd(50) + 'QUANTITY'.padEnd(10) + 'PRICE'.padEnd(10) + 'SUB-TOTAL' %><%
 for (let i = 0; i < order.items.length; i += 1) {
 	const product = order.items[i]; %>
-<%=product.name.padEnd(30) + product.quantity.toString().padEnd(10) + priceFormat(product.grossPrice).padEnd(10) + priceFormat(product.grossPrice * product.quantity) %><%
+<%=product.name.padEnd(50) + product.quantity.toString().padEnd(10) + priceFormat(product.grossPrice).padEnd(10) + priceFormat(product.grossPrice * product.quantity) %>
+<%=`${capitaliseFirst(product.deliveryType)} // ${parseDateCode(product.deliveryDate).range}`%><%
+}
+for (let i = 0; i < order.delivery.length; i += 1) {
+	const delivery = order.delivery[i]; %>
+<%=`Delivery ${parseDateCode(delivery.date).dateLong}`.padEnd(50) + '1'.padEnd(10) + priceFormat(delivery.totalPrice).padEnd(10) + priceFormat(delivery.totalPrice) %><%
 }
 %>
 <% if (order.bottomLine.totalDelivery > 0) { %>
@@ -12,8 +17,8 @@ DELIVERY: <%=priceFormat(order.bottomLine.totalDelivery) %><%
 MOMs: <%=priceFormat(order.bottomLine.totalMoms, { includeOre: true }) %>
 Total: <%=priceFormat(order.bottomLine.totalPrice) %>
 
-<%if (order.delivery.type === 'collection') { %>Please note that your items must be picked up from our store at Vikingagatan 18 on <%=deliveryDate %>.
-<%} else if (order.delivery.type === 'delivery') { %>Your items will be delivered on <%=deliveryDate %>.<% } %>
+Please note that any collections must be picked up from our store at Vikingagatan 18 at the allocated time.
+
 Whisk
 💌 hello@whisk.se
 ☎️ +46 73 141 6585

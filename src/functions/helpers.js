@@ -28,8 +28,8 @@ function priceFormat(n, userOptions = {}) {
 
 // Parse Date Code
 function parseDateCode(code) {
-  const [weekYear, weekNumber, weekday, startTime, endTime] = code.split('-');
-  const datetime = DateTime.fromObject({ weekYear, weekNumber, weekday });
+  const [year, month, day, startTime, endTime] = code.split('-');
+  const datetime = DateTime.fromObject({ year, month, day });
   const dateLong = datetime.toLocaleString({
     weekday: 'long',
     month: 'long',
@@ -38,17 +38,23 @@ function parseDateCode(code) {
   return {
     datetime,
     dateLong,
-    year: parseInt(weekYear, 10),
-    week: parseInt(weekNumber, 10),
-    day: parseInt(weekday, 10),
+    year: parseInt(year, 10),
+    month: parseInt(month, 10),
+    date: parseInt(day, 10),
     startTime,
     endTime,
     range: `${dateLong} (${startTime} - ${endTime})`
   };
 }
 
+// Capitalise first letter in word
+function capitaliseFirst(word) {
+  return `${word.charAt(0).toUpperCase()}${word.substring(1).toLowerCase()}`;
+}
+
 module.exports = {
   calculateMoms,
   priceFormat,
-  parseDateCode
+  parseDateCode,
+  capitaliseFirst
 };

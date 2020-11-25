@@ -19,18 +19,16 @@
       border-top: 1px #E0E0E0 solid;
       border-bottom: 1px #E0E0E0 solid;
     }
-    .orderform { 
-      width: 30em;
+    .orderform {
       border-collapse: collapse;
     }
     .quantity,
     .price,
     .linetotal {
-      width: 24%;
+      width: 8em;
       text-align: right;
     }
     .item {
-      width: 28%;
       text-align: left;
     }
     .subtotal {
@@ -67,10 +65,22 @@
             <a href="<%=storeUrl %>/product/<%=product.productId %>">
               <%=product.name %>
             </a>
+            <div>
+              <%=capitaliseFirst(product.deliveryType) %> // <%=parseDateCode(product.deliveryDate).range %>
+            </div>
           </td>
           <td class="quantity"><%=product.quantity %></td>
           <td class="price"><%=priceFormat(product.grossPrice) %></td>
           <td class="linetotal"><%=priceFormat(product.grossPrice * product.quantity) %></td>
+        </tr><%
+      } %>
+      <% for (let i = 0; i < order.delivery.length; i += 1) {
+        const delivery = order.delivery[i];
+        %><tr>
+          <td class="item">Delivery (<%=parseDateCode(delivery.date).dateLong %>)</td>
+          <td class="quantity">1</td>
+          <td class="price"><%=priceFormat(delivery.totalPrice) %></td>
+          <td class="linetotal"><%=priceFormat(delivery.totalPrice) %></td>
         </tr><%
       } %>
       <% if (order.bottomLine.totalDelivery > 0) { %><tr>
@@ -88,11 +98,7 @@
     </tbody>
   </table>
 
-  <%if (order.delivery.type === 'collection') {
-  %><p>Please note that your items must be picked up from our store at Vikingagatan 18 on <%=deliveryDate %>.</p>
-
-  <%} else if (order.delivery.type === 'delivery') {
-  %><p>Your items will be delivered on <%=deliveryDate %>.</p><% } %>
+  <p>Please note that any collections must be picked up from our store at Vikingagatan 18 at the allocated time.</p>
 
   <%- include('./partials/emailSignature') %>
 </body>

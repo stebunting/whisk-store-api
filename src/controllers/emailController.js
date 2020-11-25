@@ -5,7 +5,7 @@ const tag = 'store-api:emailController';
 const nodemailer = require('nodemailer');
 const ejs = require('ejs');
 const debug = require('debug')(tag);
-const { priceFormat, parseDateCode } = require('../functions/helpers');
+const { priceFormat, parseDateCode, capitaliseFirst } = require('../functions/helpers');
 
 // Global Variables
 const smtpServer = process.env.SMTP_SERVER;
@@ -60,19 +60,21 @@ function sendEmail(config) {
   });
 }
 
-async function sendConfirmationEmail(order, deliveryDate) {
+async function sendConfirmationEmail(order) {
   let html;
   let text;
   try {
     html = await ejs.renderFile('src/templates/orderConfirmationEmail.ejs', {
       order,
-      deliveryDate: parseDateCode(deliveryDate).dateLong,
+      parseDateCode,
+      capitaliseFirst,
       priceFormat,
       storeUrl: process.env.WHISK_STORE_URL
     });
     text = await ejs.renderFile('src/templates/orderConfirmationPlaintext.ejs', {
       order,
-      deliveryDate: parseDateCode(deliveryDate).dateLong,
+      parseDateCode,
+      capitaliseFirst,
       priceFormat
     });
   } catch (error) {

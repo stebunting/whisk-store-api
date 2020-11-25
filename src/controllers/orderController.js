@@ -31,16 +31,19 @@ function orderController() {
         email: orderBody.email,
         telephone: orderBody.telephone
       },
-      delivery: {
-        type: orderBody.deliveryType,
-        date: orderBody.date
-      },
+      delivery: Object.keys(basket.delivery.details).map((key) => ({
+        date: key,
+        products: basket.delivery.details[key].products,
+        totalPrice: basket.delivery.details[key].total
+      })),
       items: basket.items.map((item) => ({
         productId: item.productId,
         name: item.name,
         grossPrice: item.grossPrice,
         momsRate: item.momsRate,
-        quantity: item.quantity
+        quantity: item.quantity,
+        deliveryType: item.deliveryType,
+        deliveryDate: item.deliveryDate
       })),
       bottomLine: basket.statement.bottomLine,
       payment: {
@@ -83,8 +86,7 @@ function orderController() {
     }
 
     const order = parseOrder(body, basket);
-    const { date: friendlyDate } = body;
-
+    debug(order);
     // VERIFY ORDER
 
     // Payment Link
@@ -93,7 +95,7 @@ function orderController() {
       addOrder(order)
         .then((response) => {
           const { insertedId: orderId } = response;
-          return sendConfirmationEmail(order, friendlyDate)
+          return sendConfirmationEmail(order)
             .then((emailSent) => updateOrder(
               orderId,
               { 'payment.confirmationEmailSent': emailSent }

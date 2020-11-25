@@ -68,7 +68,7 @@ async function getBasket(basketId) {
       delivery[code].deliverable = delivery[code].deliverable
         && product.delivery.maxZone >= basket.delivery.zone;
     }
-    allCollections = allCollections && item.deliveryType === 'collection';
+    allCollections = allCollections && item.deliveryType !== 'delivery';
 
     return {
       ...item,

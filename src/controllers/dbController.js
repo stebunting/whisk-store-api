@@ -179,6 +179,19 @@ function removeBasketById(id) {
   ));
 }
 
+// Remove old baskets
+function cleanupBaskets(days) {
+  return new Promise((resolve, reject) => {
+    const milliseconds = days * 24 * 60 * 60 * 1000;
+    const maxId = Math.floor((new Date() - milliseconds) / 1000).toString(16).padEnd(24, '0');
+
+    return db.collection(collections.baskets).deleteMany({
+      _id: { $lt: ObjectId(maxId) }
+    }).then((data) => resolve(data))
+      .catch((error) => reject(error));
+  });
+}
+
 // Create New Order
 function addOrder(order) {
   return new Promise((resolve, reject) => (
@@ -249,6 +262,7 @@ module.exports = {
   removeItemFromBasket,
   getBasketById,
   removeBasketById,
+  cleanupBaskets,
   addOrder,
   updateOrder,
   getOrderById,

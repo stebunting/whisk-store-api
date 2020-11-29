@@ -1,5 +1,6 @@
 // Requirements
 const assert = require('assert').strict;
+const { ObjectId } = require('mongodb');
 const testData = require('./testData.json');
 const {
   connect,
@@ -20,7 +21,8 @@ const {
   getOrderById,
   getSwishStatus,
   updateSwishPayment,
-  updateOrder
+  updateOrder,
+  cleanupBaskets
 } = require('../src/controllers/dbController');
 
 describe('Database testing...', () => {
@@ -35,9 +37,9 @@ describe('Database testing...', () => {
   });
 
   after('Remove test collections and disconnect from MongoDB', async () => {
-    await getCursor('products').drop();
-    await getCursor('baskets').drop();
-    await getCursor('orders').drop();
+    getCursor('products').drop();
+    getCursor('baskets').drop();
+    getCursor('orders').drop();
     disconnect();
   });
 
@@ -196,6 +198,24 @@ describe('Database testing...', () => {
       numBaskets = await count('baskets');
       assert.strictEqual(deleteResponse.deletedCount, 1);
       assert.strictEqual(numBaskets, 0);
+    });
+
+    it('successfully cleans up old baskets', async () => {
+      await getCursor('baskets').insertOne({
+        _id: ObjectId('123456780000000000000000')
+      });
+      const addResponse = await addBasket();
+      const { insertedId: id } = addResponse;
+      let numEntries = await count('baskets');
+      assert.strictEqual(numEntries, 2);
+
+      await cleanupBaskets(1);
+      numEntries = await count('baskets');
+      assert.strictEqual(numEntries, 1);
+
+      const getEntry = await getBasketById(id);
+      assert.strictEqual(getEntry.length, 1);
+      assert.notStrictEqual(getEntry[0]._id.toString(), '123456780000000000000000');
     });
   });
 

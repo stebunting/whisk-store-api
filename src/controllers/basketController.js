@@ -9,7 +9,8 @@ const {
   updateBasketById,
   removeBasketById,
   removeItemFromBasket,
-  updateBasketZone
+  updateBasketZone,
+  cleanupBaskets
 } = require('./dbController');
 const { getProductById } = require('./dbController');
 const { calculateMoms, parseDateCode } = require('../functions/helpers');
@@ -32,7 +33,7 @@ function getStatement(items, delivery) {
 async function getBasket(basketId) {
   const [basket] = await getBasketById(basketId);
   if (!basket || basket.length < 1) throw new Error();
-  
+
   const products = await Promise.allSettled(
     basket.items.map((item) => getProductById(item.productId))
   );
@@ -118,6 +119,9 @@ async function getBasket(basketId) {
 }
 
 async function createBasket() {
+  // Remove Baskets older than 7 days from db
+  cleanupBaskets(7);
+
   const basket = await addBasket();
   return basket.insertedId;
 }

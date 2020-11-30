@@ -29,7 +29,6 @@ app.use('/api', apiRouter);
 
 // Entry Point
 app.get('/wakeup', (req, res) => {
-  dbController.cleanupBaskets(7);
   res.send('Awake!');
 });
 

@@ -87,7 +87,6 @@ function orderController() {
     }
 
     const order = parseOrder(body, basket);
-    debug(order);
     // VERIFY ORDER
 
     // Payment Link
@@ -174,18 +173,25 @@ function orderController() {
     const { body } = req;
     const { payeePaymentReference: orderId } = body;
 
+    // Update Swish Payment
     updateSwishPayment(body)
+      // Get Order
       .then(() => getOrderById(orderId)
         .then(([order]) => {
-          const friendlyDate = '2020-49-3';
           if (body.status === 'PAID' && !order.payment.confirmationEmailSent) {
-            return sendConfirmationEmail(order, friendlyDate)
+            // Send Email
+            return sendConfirmationEmail(order)
+              // Update Success Order Status
               .then((emailSent) => updateOrder(
                 orderId,
-                { 'payment.confirmationEmailSent': emailSent }
+                {
+                  'payment.status': body.status,
+                  'payment.confirmationEmailSent': emailSent
+                }
               ));
           }
-          return true;
+          // Update Non-Success Order Status
+          return updateOrder(orderId, { 'payment.status': body.status });
         }))
       .catch((error) => debug(error));
     return res.status(200).json({ status: 'thanks very much' });

@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const debug = require('debug')(tag);
 
+const log = require('./src/config/logger');
+
 // App configuration
 const app = express();
 const port = process.env.PORT || 3000;

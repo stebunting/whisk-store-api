@@ -31,3 +31,5 @@ winston.add(new winston.transports.MongoDB({
   metaKey: 'metadata'
 }));
 winston.info('MongoDB Logging Enabled');
+
+module.exports = winston;

@@ -34,6 +34,16 @@ app.get('/wakeup', (req, res) => {
 });
 
 // Start Server
-app.listen(port, () => {
+const server = app.listen(port, () => {
   debug(`Express server listening on port ${port}...`);
+});
+
+// Shut down gracefully
+process.on('SIGTERM', () => {
+  server.close(() => {
+    debug('Server shutting down...');
+    // Upload logs here
+    db.disconnect();
+    log.loggers.close();
+  });
 });

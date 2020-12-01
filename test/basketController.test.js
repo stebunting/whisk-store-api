@@ -1,3 +1,6 @@
+// Page Tag
+const tag = 'store-api:basketController.test';
+
 // Requirements
 const assert = require('assert').strict;
 const sinon = require('sinon');

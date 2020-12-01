@@ -17,7 +17,7 @@ module.exports = {
     'comma-dangle': 'off',
     'no-underscore-dangle': 'off',
     'no-unused-vars': ['error', {
-      varsIgnorePattern: '^(debug|log)$'
+      varsIgnorePattern: '^(debug|log|tag)$'
     }]
   },
 };

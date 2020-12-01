@@ -1,3 +1,6 @@
+// Page Tag
+const tag = 'store-api:helpers.test';
+
 // Requirements
 const assert = require('assert').strict;
 const { priceFormat, calculateMoms, parseDateCode } = require('../src/functions/helpers');

@@ -5,7 +5,7 @@ const tag = 'store-api:db-control';
 require('dotenv').config();
 const { MongoClient, ObjectId } = require('mongodb');
 const debug = require('debug')(tag);
-const log = require('../config/logger')(tag);
+const log = require('winston');
 
 const dbUrl = process.env.DB_URL;
 const dbName = process.env.DB_NAME;

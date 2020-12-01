@@ -1,3 +1,6 @@
+// Page Tag
+const tag = 'store-api:emailController.test';
+
 // Requirements
 const assert = require('assert').strict;
 const { isConnected, connect, sendConfirmationEmail } = require('../src/controllers/emailController');

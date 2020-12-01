@@ -7,7 +7,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const debug = require('debug')(tag);
-
 const log = require('./src/config/logger');
 
 // App configuration
@@ -18,11 +17,11 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Connect to MongoDB and SMTP Server
-const dbController = require('./src/controllers/dbController');
-const emailController = require('./src/controllers/emailController');
+const db = require('./src/controllers/dbController');
+const email = require('./src/controllers/emailController');
 
-dbController.connect();
-emailController.connect();
+db.connect();
+email.connect();
 
 // Routing
 const apiRouter = require('./src/routes/apiRoutes')();

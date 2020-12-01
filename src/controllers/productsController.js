@@ -3,8 +3,8 @@ const tag = 'store-api:productsController';
 
 // Requirements
 const debug = require('debug')(tag);
+const log = require('winston');
 const { getProducts, getProductById } = require('./dbController');
-const log = require('../config/logger')(tag);
 
 // Convert _id field to productId
 function mapProductsArray(products) {

@@ -7,6 +7,7 @@ const {
   test,
   isConnected,
   getCursor,
+  setUpDB,
   disconnect,
   addProduct,
   getProducts,
@@ -34,6 +35,7 @@ describe('Database testing...', () => {
     await connect();
     assert(isConnected());
     test(true);
+    setUpDB();
   });
 
   after('Remove test collections and disconnect from MongoDB', async () => {
@@ -221,6 +223,11 @@ describe('Database testing...', () => {
 
   describe('Orders...', () => {
     beforeEach(setupTest);
+
+    it('contains Swish ID index', async () => {
+      const indexExists = await getCursor('orders').indexExists('swish.id_1');
+      assert(indexExists);
+    });
 
     it('successfully adds new order...', async () => {
       const order = orders[0];

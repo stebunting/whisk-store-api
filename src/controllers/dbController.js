@@ -68,6 +68,17 @@ function getCursor(collection) {
   return db.collection(collections[collection]);
 }
 
+// Set up DB
+function setUpDB() {
+  return new Promise((resolve, reject) => (
+    db.collection(collections.orders).createIndex(
+      { 'swish.id': 1 },
+      { name: 'swish.id_1', sparse: true }
+    ).then((data) => resolve(data))
+      .catch((error) => reject(error))
+  ));
+}
+
 // Add New Product
 function addProduct(product) {
   return new Promise((resolve, reject) => (
@@ -252,6 +263,7 @@ module.exports = {
   isConnected,
   disconnect,
   getCursor,
+  setUpDB,
   count,
   addProduct,
   getProducts,

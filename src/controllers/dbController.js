@@ -5,6 +5,7 @@ const tag = 'store-api:db-control';
 require('dotenv').config();
 const { MongoClient, ObjectId } = require('mongodb');
 const debug = require('debug')(tag);
+const log = require('../config/logger')(tag);
 
 const dbUrl = process.env.DB_URL;
 const dbName = process.env.DB_NAME;
@@ -35,11 +36,11 @@ function connect() {
       .then((data) => {
         client = data;
         db = client.db(dbName);
-        debug('Connected to MongoDB');
+        log.info('Connected to MongoDB');
         return resolve(db);
       })
       .catch((error) => {
-        debug('Error connecting to MongoDB');
+        log.error('Error connecting to MongoDB');
         return reject(error);
       });
   });
@@ -51,15 +52,13 @@ function disconnect() {
     client.close();
     client = undefined;
     db = undefined;
-    debug('Disconnected from MongoDB');
+    log.info('Disconnected from MongoDB');
   }
 }
 
 // Return true or false if database is connected or not
 function isConnected() {
-  if (client === undefined) {
-    return false;
-  }
+  if (client === undefined) return false;
   return client.isConnected();
 }
 
@@ -73,7 +72,7 @@ function setUpDB() {
   return new Promise((resolve, reject) => (
     db.collection(collections.orders).createIndex(
       { 'swish.id': 1 },
-      { name: 'swish.id_1', sparse: true }
+      { sparse: true }
     ).then((data) => resolve(data))
       .catch((error) => reject(error))
   ));

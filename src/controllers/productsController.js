@@ -4,6 +4,7 @@ const tag = 'store-api:productsController';
 // Requirements
 const debug = require('debug')(tag);
 const { getProducts, getProductById } = require('./dbController');
+const log = require('../config/logger')(tag);
 
 // Convert _id field to productId
 function mapProductsArray(products) {
@@ -27,6 +28,7 @@ async function fetchProducts(req, res) {
     });
   } catch (error) {
     // Database Error
+    log.error('Error fetching products from database', { metadata: error });
     return res.status(500).json({
       status: 'error'
     });
@@ -43,6 +45,7 @@ async function fetchProduct(req, res) {
 
     // Check a product has been returned
     if (data.length < 1) {
+      log.error('Could not find productId in database', { metadata: data });
       return res.status(400).json({
         status: 'error'
       });
@@ -56,6 +59,7 @@ async function fetchProduct(req, res) {
     });
   } catch (error) {
     // Database Error
+    log.error('Error fetching product from database', { metadata: error });
     return res.status(500).json({
       status: 'error'
     });

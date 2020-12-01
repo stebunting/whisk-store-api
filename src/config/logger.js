@@ -6,33 +6,33 @@ const { createLogger, transports, format } = require('winston');
 require('winston-mongodb');
 const debug = require('debug')(tag);
 
-const {
-  combine,
-  json,
-  timestamp,
-  printf
-} = format;
-
-const logger = createLogger({
-  transports: [
-    new transports.Console({
-      level: 'info',
-      format: printf(({ level, message }) => `${level} | ${message}`)
-    }),
-    new transports.File({
-      level: 'info',
-      filename: 'logs/log.log',
-      format: combine(
-        timestamp(),
-        json()
-      )
-    }),
-    new transports.MongoDB({
-      level: 'error',
-      db: process.env.DB_URL,
-      collection: 'storeErrorLog'
-    })
-  ]
-});
+function logger(logTag) {
+  return createLogger({
+    transports: [
+      new transports.Console({
+        level: 'info',
+        format: format.combine(
+          format.label({ label: logTag }),
+          format.printf(({ level, message, label }) => `${level} | ${label} // ${message}`)
+        )
+      }),
+      new transports.File({
+        level: 'info',
+        filename: 'logs/log.log',
+        format: format.combine(
+          format.label({ label: logTag }),
+          format.timestamp()
+        )
+      }),
+      new transports.MongoDB({
+        level: 'error',
+        db: process.env.DB_URL,
+        collection: 'storeErrorLog',
+        label: logTag,
+        metaKey: 'metadata'
+      })
+    ]
+  });
+}
 
 module.exports = logger;

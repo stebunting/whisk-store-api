@@ -90,7 +90,7 @@ function addProduct(product) {
 // Get Products from DB
 function getProducts(query = {}) {
   return new Promise((resolve, reject) => (
-    db.collection(collections.products).find(query) //.toArray()
+    db.collection(collections.products).find(query).toArray()
       .then((data) => resolve(data))
       .catch((error) => reject(error))
   ));
@@ -224,14 +224,16 @@ function updateOrder(orderId, query) {
 }
 
 // Get Order from DB
-function getOrderById(id) {
+function getAllOrders(query = {}) {
   return new Promise((resolve, reject) => (
-    db.collection(collections.orders).find({
-      _id: ObjectId(id)
-    }).toArray()
+    db.collection(collections.orders).find(query).toArray()
       .then((data) => resolve(data))
       .catch((error) => reject(error))
   ));
+}
+
+function getOrderById(id) {
+  return getAllOrders({ _id: ObjectId(id) });
 }
 
 // Check Swish Status
@@ -276,6 +278,7 @@ module.exports = {
   cleanupBaskets,
   addOrder,
   updateOrder,
+  getAllOrders,
   getOrderById,
   getSwishStatus,
   updateSwishPayment

@@ -11,6 +11,7 @@ const {
   getSwishStatus,
   updateSwishPayment,
   updateOrder,
+  getAllOrders,
   getOrderById
 } = require('./dbController');
 const { sendConfirmationEmail } = require('./emailController');
@@ -24,6 +25,11 @@ const swish = new Swish({
 });
 
 function orderController() {
+  async function getOrders(req, res) {
+    const orders = await getAllOrders();
+    return res.json(orders);
+  }
+
   function parseOrder(orderBody, basket) {
     let order = {
       details: {
@@ -198,6 +204,7 @@ function orderController() {
   }
 
   return {
+    getOrders,
     createOrder,
     checkPaymentStatus,
     swishCallback

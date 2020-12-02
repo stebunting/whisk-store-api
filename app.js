@@ -30,17 +30,20 @@ app.use('/api', apiRouter);
 
 // Entry Point
 app.get('/wakeup', (req, res) => {
-  res.send('Awake!');
+  log.info('Waking up Heroku Server', { metadata: { tag } });
+  return res.status(200).send('Awake!');
 });
 
 // Start Server
 const server = app.listen(port, () => {
+  log.info('Server starting', { metadata: { tag } });
   debug(`Express server listening on port ${port}...`);
 });
 
 // Shut down gracefully
 process.on('SIGTERM', () => {
   server.close(() => {
+    log.info('Server shutting down', { metadata: { tag } });
     debug('Server shutting down...');
     // Upload logs here
     db.disconnect();

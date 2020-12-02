@@ -28,7 +28,7 @@ async function fetchProducts(req, res) {
     });
   } catch (error) {
     // Database Error
-    log.error('Error fetching products from database', { metadata: error });
+    log.error('Error fetching products from database', { metadata: { tag, error } });
     return res.status(500).json({
       status: 'error'
     });
@@ -45,7 +45,7 @@ async function fetchProduct(req, res) {
 
     // Check a product has been returned
     if (data.length < 1) {
-      log.error('Could not find productId in database', { metadata: data });
+      log.error('Could not find productId in database', { metadata: { tag, data } });
       return res.status(400).json({
         status: 'error'
       });
@@ -59,7 +59,7 @@ async function fetchProduct(req, res) {
     });
   } catch (error) {
     // Database Error
-    log.error('Error fetching product from database', { metadata: error });
+    log.error('Error fetching product from database', { metadata: { tag, error } });
     return res.status(500).json({
       status: 'error'
     });

@@ -10,7 +10,9 @@ winston.add(new winston.transports.Console({
   name: 'console',
   level: 'info',
   format: winston.format.combine(
-    winston.format.printf(({ level, message }) => `${level} | ${message}`)
+    winston.format.printf(({ level, message, metadata }) => (
+      `${metadata && metadata.tag} | ${level} // ${message}`
+    ))
   )
 }));
 winston.add(new winston.transports.File({
@@ -27,9 +29,8 @@ winston.add(new winston.transports.MongoDB({
   level: 'error',
   db: process.env.DB_URL,
   options: { useUnifiedTopology: true },
-  collection: 'storeErrorLog',
-  metaKey: 'metadata'
+  collection: 'storeErrorLog'
 }));
-winston.info('MongoDB Logging Enabled');
+winston.info('MongoDB Logging Enabled', { metadata: { tag } });
 
 module.exports = winston;

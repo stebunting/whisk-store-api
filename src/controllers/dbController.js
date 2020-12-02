@@ -36,11 +36,11 @@ function connect() {
       .then((data) => {
         client = data;
         db = client.db(dbName);
-        log.info('Connected to MongoDB');
+        log.info('Connected to MongoDB', { metadata: { tag } });
         return resolve(db);
       })
       .catch((error) => {
-        log.error('Error connecting to MongoDB');
+        log.error('Error connecting to MongoDB', { metadata: { tag } });
         return reject(error);
       });
   });
@@ -52,7 +52,7 @@ function disconnect() {
     client.close();
     client = undefined;
     db = undefined;
-    log.info('Disconnected from MongoDB');
+    log.info('Disconnected from MongoDB', { metadata: { tag } });
   }
 }
 
@@ -90,7 +90,7 @@ function addProduct(product) {
 // Get Products from DB
 function getProducts(query = {}) {
   return new Promise((resolve, reject) => (
-    db.collection(collections.products).find(query).toArray()
+    db.collection(collections.products).find(query) //.toArray()
       .then((data) => resolve(data))
       .catch((error) => reject(error))
   ));

@@ -17,9 +17,10 @@ const {
   getOrders,
   createOrder,
   checkPaymentStatus,
-  swishCallback
+  swishCallback,
+  setStatus
 } = require('../controllers/orderController')();
-const { checkAdminKey } = require('../controllers/authController');
+const { login, checkAdminKey } = require('../controllers/authController');
 
 function routes() {
   const apiRoutes = express.Router();
@@ -42,6 +43,10 @@ function routes() {
 
   // Admin Routes
   apiRoutes.route('/orders').get(checkAdminKey, getOrders);
+  apiRoutes.route('/order/status').put(checkAdminKey, setStatus);
+
+  // User Routes
+  apiRoutes.route('/login').post(login);
 
   return apiRoutes;
 }

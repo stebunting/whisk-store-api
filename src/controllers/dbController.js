@@ -14,7 +14,8 @@ let db;
 const collections = {
   products: 'storeProducts',
   baskets: 'storeBaskets',
-  orders: 'storeOrders'
+  orders: 'storeOrders',
+  admin: 'storeAdmin'
 };
 
 function test(testing = false) {
@@ -22,10 +23,12 @@ function test(testing = false) {
     collections.products = '__test_storeProducts';
     collections.baskets = '__test_storeBaskets';
     collections.orders = '__test_storeOrders';
+    collections.admin = '__test_storeAdmin';
   } else {
     collections.products = 'storeProducts';
     collections.baskets = 'storeBaskets';
     collections.orders = 'storeOrders';
+    collections.admin = 'storeAdmin';
   }
 }
 
@@ -40,7 +43,7 @@ function connect() {
         return resolve(db);
       })
       .catch((error) => {
-        log.error('Error connecting to MongoDB', { metadata: { tag } });
+        log.error('Error connecting to MongoDB', { metadata: { tag, error } });
         return reject(error);
       });
   });
@@ -226,7 +229,7 @@ function updateOrder(orderId, query) {
 // Get Order from DB
 function getAllOrders(query = {}) {
   return new Promise((resolve, reject) => (
-    db.collection(collections.orders).find(query).toArray()
+    db.collection(collections.orders).find(query).sort({ _id: -1 }).toArray()
       .then((data) => resolve(data))
       .catch((error) => reject(error))
   ));
@@ -258,6 +261,17 @@ function updateSwishPayment(payment) {
   ));
 }
 
+// Get Admin User from DB
+function getAdminUser(username) {
+  return new Promise((resolve, reject) => (
+    db.collection(collections.admin).find(
+      { username }
+    ).toArray()
+      .then((data) => resolve(data))
+      .catch((error) => reject(error))
+  ));
+}
+
 module.exports = {
   test,
   connect,
@@ -281,5 +295,6 @@ module.exports = {
   getAllOrders,
   getOrderById,
   getSwishStatus,
-  updateSwishPayment
+  updateSwishPayment,
+  getAdminUser
 };

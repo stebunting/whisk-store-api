@@ -26,8 +26,12 @@ const swish = new Swish({
 
 function orderController() {
   async function getOrders(req, res) {
-    const orders = await getAllOrders();
-    return res.json(orders);
+    try {
+      const orders = await getAllOrders();
+      return res.status(200).json({ status: 'ok', orders });
+    } catch (error) {
+      return res.status(400).json({ status: 'error' });
+    }
   }
 
   function parseOrder(orderBody, basket) {
@@ -36,6 +40,7 @@ function orderController() {
         name: orderBody.name,
         email: orderBody.email,
         telephone: orderBody.telephone,
+        address: orderBody.address,
         notes: orderBody.notes
       },
       delivery: Object.keys(basket.delivery.details).map((key) => ({
@@ -203,11 +208,26 @@ function orderController() {
     return res.status(200).json({ status: 'thanks very much' });
   }
 
+  async function setStatus(req, res) {
+    const { body } = req;
+    if (!('orderId' in body) || !('status' in body)) {
+      return res.status(400).json({ status: 'error' });
+    }
+
+    await updateOrder(body.orderId, { 'payment.status': body.status });
+    const orders = await getOrderById(body.orderId);
+    if (orders.length > 0) {
+      return res.status(200).json({ status: 'ok', order: orders[0] });
+    }
+    return res.status(400).json({ status: 'error' });
+  }
+
   return {
     getOrders,
     createOrder,
     checkPaymentStatus,
-    swishCallback
+    swishCallback,
+    setStatus
   };
 }
 

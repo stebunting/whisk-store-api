@@ -19,6 +19,7 @@ const {
   checkPaymentStatus,
   swishCallback
 } = require('../controllers/orderController')();
+const { checkAdminKey } = require('../controllers/authController');
 
 function routes() {
   const apiRoutes = express.Router();
@@ -35,10 +36,12 @@ function routes() {
   apiRoutes.route('/basket/update/remove/:basketId').put(removeFromBasket, apiGetBasket);
   apiRoutes.route('/basket/:basketId').delete(apiDeleteBasket, apiCreateBasket, apiGetBasket);
 
-  apiRoutes.route('/orders').get(getOrders);
   apiRoutes.route('/order/:basketId').post(createOrder);
   apiRoutes.route('/order/swish/:swishId').get(checkPaymentStatus);
   apiRoutes.route('/order/swish/callback').post(swishCallback);
+
+  // Admin Routes
+  apiRoutes.route('/orders').get(checkAdminKey, getOrders);
 
   return apiRoutes;
 }

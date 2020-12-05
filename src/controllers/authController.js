@@ -9,10 +9,10 @@ const adminKey = process.env.ADMIN_KEY;
 
 function checkAdminKey(req, res, next) {
   const { authorization } = req.headers;
-  if (!authorization || authorization !== `Basic ${adminKey}`) {
-    return res.json({ status: 'error' });
+  if (authorization && authorization === `Basic ${adminKey}`) {
+    return next();
   }
-  return next();
+  return res.json({ status: 'error' });
 }
 
 module.exports = { checkAdminKey };

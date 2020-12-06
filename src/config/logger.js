@@ -29,7 +29,7 @@ winston.add(new winston.transports.MongoDB({
   level: 'error',
   db: process.env.DB_URL,
   options: { useUnifiedTopology: true },
-  collection: 'storeErrorLog'
+  collection: 'log'
 }));
 winston.info('MongoDB Logging Enabled', { metadata: { tag } });
 

@@ -12,23 +12,23 @@ const dbName = process.env.DB_NAME;
 let client;
 let db;
 const collections = {
-  products: 'storeProducts',
-  baskets: 'storeBaskets',
-  orders: 'storeOrders',
-  admin: 'storeAdmin'
+  products: 'products',
+  baskets: 'baskets',
+  orders: 'orders',
+  admin: 'admin'
 };
 
 function test(testing = false) {
   if (testing) {
-    collections.products = '__test_storeProducts';
-    collections.baskets = '__test_storeBaskets';
-    collections.orders = '__test_storeOrders';
-    collections.admin = '__test_storeAdmin';
+    collections.products = '__test_products';
+    collections.baskets = '__test_baskets';
+    collections.orders = '__test_orders';
+    collections.admin = '__test_admin';
   } else {
-    collections.products = 'storeProducts';
-    collections.baskets = 'storeBaskets';
-    collections.orders = 'storeOrders';
-    collections.admin = 'storeAdmin';
+    collections.products = 'products';
+    collections.baskets = 'baskets';
+    collections.orders = 'orders';
+    collections.admin = 'admin';
   }
 }
 

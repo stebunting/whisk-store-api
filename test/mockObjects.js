@@ -1,6 +1,6 @@
 const sinon = require('sinon');
 
-const request = (params) => ({
+const request = (params = {}) => ({
   params
 });
 
@@ -11,7 +11,10 @@ const response = () => {
   return res;
 };
 
+const next = sinon.stub();
+
 module.exports = {
   request,
-  response
+  response,
+  next
 };

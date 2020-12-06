@@ -5,9 +5,19 @@
     "grossPrice": 450
   }],
   "baskets": [{
+    "items": [],
+    "delivery": {
+      "zone": -1,
+      "address": ""
+    }
+  }, {
     "_id": "5faaab09669770905ac10e2f",
-    "items": {
+    "items": [{
       "5faaab09669770905ac10e1f": 2
+    }],
+    "delivery": {
+      "zone": -1,
+      "address": ""
     }
   }],
   "orders": [{

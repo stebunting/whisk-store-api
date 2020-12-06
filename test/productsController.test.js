@@ -8,7 +8,7 @@ const db = require('../src/controllers/dbController');
 const mockObjects = require('./mockObjects');
 const testData = require('./testData.json');
 
-describe('GET...', () => {
+describe('Product Calls...', () => {
   let getProductsStub;
   let getProductByIdStub;
   let fetchProducts;
@@ -44,7 +44,7 @@ describe('GET...', () => {
     getProductByIdStub.restore();
   });
 
-  describe('product list route...', () => {
+  describe('to get list of products...', () => {
     beforeEach(setUpStubs);
     afterEach(resetStubs);
 
@@ -75,7 +75,7 @@ describe('GET...', () => {
     });
   });
 
-  describe('single product route...', () => {
+  describe('to get single product...', () => {
     beforeEach(setUpStubs);
     afterEach(resetStubs);
 

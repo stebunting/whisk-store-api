@@ -26,7 +26,7 @@ const {
   cleanupBaskets
 } = require('../src/controllers/dbController');
 
-describe('Database testing...', () => {
+describe('Database repository...', () => {
   let products;
   let orders;
   let swishPayments;
@@ -54,20 +54,20 @@ describe('Database testing...', () => {
     swishPayments = testData.swishPayments;
   }
 
-  describe('Products...', () => {
+  describe('product calls...', () => {
     beforeEach(setupTest);
 
-    it('contains slug index', async () => {
+    it('contains slug index in product collection', async () => {
       const indexExists = await getCursor('products').indexExists('slug_1');
       assert(indexExists);
     });
 
-    it('starts with empty db...', async () => {
+    it('starts with empty db', async () => {
       const response = await count('products');
       assert.strictEqual(response, 0);
     });
 
-    it('successfully added...', async () => {
+    it('successfully adds product', async () => {
       const product = products[0];
 
       const response = await addProduct(product);
@@ -79,7 +79,7 @@ describe('Database testing...', () => {
       assert.strictEqual(entries, 1);
     });
 
-    it('gets all products when db empty...', async () => {
+    it('gets all products when db empty', async () => {
       const response = await getProducts();
       assert.strictEqual(response.length, 0);
     });
@@ -104,17 +104,17 @@ describe('Database testing...', () => {
     });
   });
 
-  describe('Baskets...', () => {
+  describe('basket calls...', () => {
     beforeEach(setupTest);
 
-    it('successfully creates empty basket...', async () => {
+    it('successfully creates empty basket', async () => {
       const response = await addBasket();
       assert.strictEqual(response.insertedCount, 1);
       assert.strictEqual(response.ops.length, 1);
       assert.deepStrictEqual(response.ops[0].items, []);
     });
 
-    it('successfully gets basket...', async () => {
+    it('successfully gets basket', async () => {
       const addResponse = await addBasket();
       const { insertedId: id } = addResponse;
 
@@ -123,7 +123,7 @@ describe('Database testing...', () => {
       assert.deepStrictEqual(response[0]._id, id);
     });
 
-    it('successfully adds item to basket...', async () => {
+    it('successfully adds item to basket', async () => {
       const addResponse = await addBasket();
       const { insertedId: basketId } = addResponse;
 
@@ -226,15 +226,15 @@ describe('Database testing...', () => {
     });
   });
 
-  describe('Orders...', () => {
+  describe('order calls...', () => {
     beforeEach(setupTest);
 
-    it('contains Swish ID index', async () => {
+    it('contains Swish ID index in order collection', async () => {
       const indexExists = await getCursor('orders').indexExists('swish.id_1');
       assert(indexExists);
     });
 
-    it('successfully adds new order...', async () => {
+    it('successfully adds new order', async () => {
       const order = orders[0];
       const response = await addOrder(order);
       assert.strictEqual(response.insertedCount, 1);

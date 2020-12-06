@@ -8,8 +8,11 @@ const db = require('../src/controllers/dbController');
 const mockObjects = require('./mockObjects');
 const testData = require('./testData.json');
 
-describe.skip('GET...', () => {
+describe('Basket Calls...', () => {
+  let cleanUpBasketsStub;
+  let createBasketStub;
   let getBasketByIdStub;
+  let apiCreateBasket;
   let apiGetBasket;
   let req;
   let res;
@@ -22,28 +25,34 @@ describe.skip('GET...', () => {
   };
 
   const resetStubs = () => {
+    cleanUpBasketsStub.resetHistory();
+    createBasketStub.resetHistory();
     getBasketByIdStub.resetHistory();
   };
 
   before(() => {
     // Stubs
+    cleanUpBasketsStub = sinon.stub(db, 'cleanupBaskets');
+    createBasketStub = sinon.stub(db, 'addBasket');
     getBasketByIdStub = sinon.stub(db, 'getBasketById');
 
     // File under test
-    ({ apiGetBasket } = require('../src/controllers/basketController'));
+    ({ apiCreateBasket, apiGetBasket } = require('../src/controllers/basketController'));
   });
 
   after(() => {
     // Restore Methods
+    cleanUpBasketsStub.restore();
+    createBasketStub.restore();
     getBasketByIdStub.restore();
   });
 
-  describe('get basket route...', () => {
+  describe.skip('to get a basket...', () => {
     beforeEach(setUpStubs);
     afterEach(resetStubs);
 
     it('gets basket with valid id', async () => {
-      getBasketByIdStub.returns(baskets[0]);
+      getBasketByIdStub.returns(baskets[1]);
       req = mockObjects.request({ basketId: 'validId' });
       await apiGetBasket(req, res);
 
@@ -51,6 +60,23 @@ describe.skip('GET...', () => {
       assert(getBasketByIdStub.calledWith('validId'));
       assert(res.status.calledWith(200));
       assert(res.status.calledOnce);
+    });
+  });
+
+  describe('to create a new basket...', () => {
+    beforeEach(setUpStubs);
+    afterEach(resetStubs);
+
+    it('creates a new basket', async () => {
+      createBasketStub.returns({ insertedId: 'abcdef123456' });
+      const { next } = mockObjects;
+      await apiCreateBasket(req, res, next);
+
+      assert(cleanUpBasketsStub.calledOnce);
+      assert(cleanUpBasketsStub.calledWith(7));
+      assert(createBasketStub.calledOnce);
+      assert(next.calledOnce);
+      assert.strictEqual(req.params.id, 'abcdef123456');
     });
   });
 });

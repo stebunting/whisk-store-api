@@ -32,7 +32,7 @@ describe('E-Mailer...', () => {
     });
   });
 
-  describe('Send confirmation email to user', () => {
+  describe('correctly...', () => {
     beforeEach(setUpTestData);
 
     it('creates transporter', async () => {

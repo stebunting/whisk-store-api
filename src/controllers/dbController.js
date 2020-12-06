@@ -76,7 +76,10 @@ function setUpDB() {
     db.collection(collections.orders).createIndex(
       { 'swish.id': 1 },
       { sparse: true }
-    ).then((data) => resolve(data))
+    ).then(() => db.collection(collections.products).createIndex(
+      { slug: 1 },
+      { unique: true }
+    )).then((data) => resolve(data))
       .catch((error) => reject(error))
   ));
 }

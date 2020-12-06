@@ -57,6 +57,11 @@ describe('Database testing...', () => {
   describe('Products...', () => {
     beforeEach(setupTest);
 
+    it('contains slug index', async () => {
+      const indexExists = await getCursor('products').indexExists('slug_1');
+      assert(indexExists);
+    });
+
     it('starts with empty db...', async () => {
       const response = await count('products');
       assert.strictEqual(response, 0);

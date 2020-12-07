@@ -59,7 +59,7 @@ describe('Product Calls...', () => {
       assert.strictEqual(jsonCall.products.length, 1);
       assert.strictEqual(jsonCall.products[0].name, 'Christmas Box');
       assert.strictEqual(jsonCall.products[0].description, 'A Christmas Box');
-      assert.strictEqual(jsonCall.products[0].grossPrice, 450);
+      assert.strictEqual(jsonCall.products[0].grossPrice, 39500);
       assert(res.json.calledOnce);
     });
 
@@ -118,7 +118,7 @@ describe('Product Calls...', () => {
       assert.strictEqual(jsonCall.status, 'ok');
       assert.strictEqual(jsonCall.product.name, 'Christmas Box');
       assert.strictEqual(jsonCall.product.description, 'A Christmas Box');
-      assert.strictEqual(jsonCall.product.grossPrice, 450);
+      assert.strictEqual(jsonCall.product.grossPrice, 39500);
       assert(res.json.calledOnce);
     });
   });

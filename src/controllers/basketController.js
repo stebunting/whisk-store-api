@@ -2,6 +2,7 @@
 const tag = 'store-api:basketController';
 
 // Requirements
+const log = require('winston');
 const debug = require('debug')(tag);
 const {
   getBasketById,
@@ -12,7 +13,7 @@ const {
   updateBasketZone,
   cleanupBaskets
 } = require('./dbController');
-const { getProductById } = require('./dbController');
+const { getProductBySlug } = require('./dbController');
 const { calculateMoms, parseDateCode } = require('../functions/helpers');
 
 // Method to get a statement from a baskets items
@@ -21,36 +22,49 @@ function getStatement(items, delivery) {
   const bottomLine = items.reduce((acc, next) => ({
     ...acc,
     totalMoms: acc.totalMoms + calculateMoms(next.quantity * next.grossPrice, next.momsRate),
-    totalPrice: acc.totalDelivery + acc.totalPrice + next.linePrice
+    totalPrice: acc.totalPrice + next.linePrice
   }), {
     totalDelivery: delivery.deliveryTotal || 0,
     totalMoms: deliveryMoms,
-    totalPrice: 0
+    totalPrice: delivery.deliveryTotal || 0
   });
   return { bottomLine };
 }
 
 async function getBasket(basketId) {
-  const [basket] = await getBasketById(basketId);
-  if (!basket || basket.length < 1) throw new Error();
+  // Get Basket from database by id
+  let basket = await getBasketById(basketId);
+  if (!basket || basket.length < 1) {
+    log.error('Attempting to retrieve invalid basket from db', { metadata: { tag, basketId } });
+    throw new Error('No such basket');
+  } else {
+    [basket] = basket;
+  }
 
-  const products = await Promise.allSettled(
-    basket.items.map((item) => getProductById(item.productId))
-  );
+  // Add product information for each item in basket to item.details
+  const promises = [];
+  for (let i = 0; i < basket.items.length; i += 1) {
+    promises.push(getProductBySlug(basket.items[i].productSlug)
+      .then((product) => {
+        if (product.length > 0) {
+          [basket.items[i].details] = product;
+        } else {
+          throw Error('Got 0 length array while getting all products from basket');
+        }
+      }).catch((error) => {
+        log.error('Could not get all products from basket', { metadata: { tag, error, basketId } });
+        throw error;
+      }));
+  }
+  await Promise.all(promises);
 
+  // Create delivery object for each item
   const delivery = {};
   let allCollections = true;
-  const items = basket.items.map((item, index) => {
-    const response = products[index];
-    if (response.status !== 'fulfilled' || response.value.length < 1) {
-      return item;
-    }
-    const [product] = response.value;
-
-    // Delivery
+  const items = basket.items.map((item) => {
     if (item.deliveryType === 'delivery') {
-      const { year, month, date } = parseDateCode(item.deliveryDate);
-      const code = `${year}-${month}-${date}`;
+      // Get date code and create details for this date if necessary
+      const { code } = parseDateCode(item.deliveryDate);
       if (!delivery[code]) {
         delivery[code] = {
           products: [],
@@ -58,37 +72,43 @@ async function getBasket(basketId) {
           deliverable: true
         };
       }
+
+      // Add new product object for this item and update fields
+      const productDelivery = item.details.delivery;
       delivery[code].products.push({
-        productId: item.productId,
+        slug: item.details.slug,
         quantity: item.quantity,
-        deliveryCost: product.delivery.costs[basket.delivery.zone]
-          ? product.delivery.costs[basket.delivery.zone].price
+        deliveryCost: productDelivery.costs[basket.delivery.zone]
+          ? productDelivery.costs[basket.delivery.zone].price
           : 0
       });
-      delivery[code].maxZone = Math.max(product.delivery.maxZone, delivery[code].maxZone);
+      delivery[code].maxZone = Math.max(productDelivery.maxZone, delivery[code].maxZone);
       delivery[code].deliverable = delivery[code].deliverable
-        && product.delivery.maxZone >= basket.delivery.zone;
+        && productDelivery.maxZone >= basket.delivery.zone;
     }
     allCollections = allCollections && item.deliveryType !== 'delivery';
 
     return {
       ...item,
-      name: product.name,
-      details: product,
-      linePrice: item.quantity * product.grossPrice,
-      momsRate: product.momsRate,
-      grossPrice: product.grossPrice
+      name: item.details.name,
+      linePrice: item.quantity * item.details.grossPrice,
+      momsRate: item.details.momsRate,
+      grossPrice: item.details.grossPrice
     };
   });
 
-  // Get cost for each days delivery
+  // Loop over date codes in delivery object
+  // Get lowest cost for each days delivery
   let deliveryTotal = 0;
   const deliveryDetails = Object.keys(delivery).reduce((acc, date) => {
+    // Get minimum price for each date
     const info = delivery[date];
     const total = info.products.reduce((minimum, product) => {
       if (product.deliveryCost < minimum) return product.deliveryCost;
       return minimum;
     }, info.products[0].deliveryCost);
+
+    // Add data to accumulator, reduce products to single object
     acc[date] = {
       ...info,
       momsRate: 25,

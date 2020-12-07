@@ -4,22 +4,26 @@ const tag = 'store-api:basketController.test';
 // Requirements
 const assert = require('assert').strict;
 const sinon = require('sinon');
+const debug = require('debug')(tag);
 const db = require('../src/controllers/dbController');
 const mockObjects = require('./mockObjects');
 const testData = require('./testData.json');
 
-describe('Basket Calls...', () => {
+describe.skip('Basket Calls...', () => {
   let cleanUpBasketsStub;
   let createBasketStub;
   let getBasketByIdStub;
+  let getProductByIdStub;
   let apiCreateBasket;
-  let apiGetBasket;
+  let getBasket;
   let req;
   let res;
   let baskets;
+  let products;
 
   const setUpStubs = () => {
     baskets = testData.baskets;
+    products = testData.products;
     req = mockObjects.request();
     res = mockObjects.response();
   };
@@ -28,6 +32,7 @@ describe('Basket Calls...', () => {
     cleanUpBasketsStub.resetHistory();
     createBasketStub.resetHistory();
     getBasketByIdStub.resetHistory();
+    getProductByIdStub.resetHistory();
   };
 
   before(() => {
@@ -35,9 +40,10 @@ describe('Basket Calls...', () => {
     cleanUpBasketsStub = sinon.stub(db, 'cleanupBaskets');
     createBasketStub = sinon.stub(db, 'addBasket');
     getBasketByIdStub = sinon.stub(db, 'getBasketById');
+    getProductByIdStub = sinon.stub(db, 'getProductById');
 
     // File under test
-    ({ apiCreateBasket, apiGetBasket } = require('../src/controllers/basketController'));
+    ({ apiCreateBasket, getBasket } = require('../src/controllers/basketController'));
   });
 
   after(() => {
@@ -45,21 +51,27 @@ describe('Basket Calls...', () => {
     cleanUpBasketsStub.restore();
     createBasketStub.restore();
     getBasketByIdStub.restore();
+    getProductByIdStub.restore();
   });
 
-  describe.skip('to get a basket...', () => {
+  describe('to get a basket...', () => {
     beforeEach(setUpStubs);
     afterEach(resetStubs);
 
-    it('gets basket with valid id', async () => {
-      getBasketByIdStub.returns(baskets[1]);
-      req = mockObjects.request({ basketId: 'validId' });
-      await apiGetBasket(req, res);
+    it('returns no baskets with invalid id', async () => {
+      getBasketByIdStub.resolves([]);
+      await assert.rejects(getBasket(req, res));
 
       assert(getBasketByIdStub.calledOnce);
-      assert(getBasketByIdStub.calledWith('validId'));
-      assert(res.status.calledWith(200));
-      assert(res.status.calledOnce);
+    });
+
+    it('returns baskets', async () => {
+      const product = products[0];
+      getBasketByIdStub.resolves(baskets[1]);
+      getProductByIdStub.resolves(product);
+
+      const response = await getBasket(req, res);
+      assert(getBasketByIdStub.calledOnce);
     });
   });
 

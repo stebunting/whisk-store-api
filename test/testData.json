@@ -1,8 +1,42 @@
 {
   "products": [{
     "name": "Christmas Box",
+    "slug": "whisk-christmas-hamper",
+    "brand": "Whisk",
+    "category": "Christmas",
     "description": "A Christmas Box",
-    "grossPrice": 450
+    "momsRate": 12,
+    "grossPrice": 39500,
+    "deliveryMethods": [
+      "delivery"
+    ],
+    "delivery": {
+      "dates": [{
+        "year": 2020,
+        "month": 12,
+        "date": 4,
+        "time": { "start": "12:00", "end": "15:00" },
+        "deadline": {
+          "year": 2020,
+          "month": 12,
+          "date": 3,
+          "hours": 10
+        }
+      }],
+      "costs": {
+        "0": {
+          "zone": 0,
+          "price": 0,
+          "momsRate": 25
+        },
+        "1": {
+          "zone": 1,
+          "price": 4500,
+          "momsRate": 25
+        }
+      },
+      "maxZone": 2
+    }
   }],
   "baskets": [{
     "items": [],
@@ -13,11 +47,19 @@
   }, {
     "_id": "5faaab09669770905ac10e2f",
     "items": [{
-      "5faaab09669770905ac10e1f": 2
+      "deliveryType": "delivery",
+      "deliveryDate": "2020-12-11-12:00-15:00",
+      "slug": "whisk-christmas-hamper",
+      "quantity": 1
+    }, {
+      "deliveryType": "delivery",
+      "deliveryDate": "2020-12-18-12:00-15:00",
+      "slug": "whisk-christmas-hamper",
+      "quantity": 2
     }],
     "delivery": {
-      "zone": -1,
-      "address": ""
+      "zone": 1,
+      "address": "Sandhamnsgatan, Stockholm, Sweden"
     }
   }],
   "orders": [{

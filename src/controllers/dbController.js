@@ -106,6 +106,9 @@ function getProducts(query = {}) {
 function getProductById(id) {
   return getProducts({ _id: ObjectId(id) });
 }
+function getProductBySlug(slug) {
+  return getProducts({ slug });
+}
 
 // Get Number of Products
 function count(collection) {
@@ -162,7 +165,7 @@ function removeItemFromBasket(basketId, payload) {
       {
         $pull: {
           items: {
-            productId: payload.productId,
+            productSlug: payload.productSlug,
             deliveryType: payload.deliveryType,
             deliveryDate: payload.deliveryDate
           }
@@ -286,6 +289,7 @@ module.exports = {
   addProduct,
   getProducts,
   getProductById,
+  getProductBySlug,
   addBasket,
   updateBasketById,
   updateBasketZone,

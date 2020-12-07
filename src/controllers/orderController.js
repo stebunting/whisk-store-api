@@ -49,7 +49,7 @@ function orderController() {
         totalPrice: basket.delivery.details[key].total
       })),
       items: basket.items.map((item) => ({
-        productId: item.productId,
+        productSlug: item.productSlug,
         name: item.name,
         grossPrice: item.grossPrice,
         momsRate: item.momsRate,

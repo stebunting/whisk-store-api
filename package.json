@@ -7,7 +7,7 @@
     "start": "node app",
     "dev": "nodemon app",
     "ngrok": "ngrok http 5000",
-    "test": "nyc mocha --require test/fixtures.cjs"
+    "test": "DEBUG=store-api,store-api:* DEBUG_DEPTH=5 nyc mocha --require test/fixtures.cjs"
   },
   "author": "Steve Bunting",
   "license": "ISC",

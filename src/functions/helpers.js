@@ -41,6 +41,7 @@ function parseDateCode(code) {
     year: parseInt(year, 10),
     month: parseInt(month, 10),
     date: parseInt(day, 10),
+    code: `${parseInt(year, 10)}-${parseInt(month, 10)}-${parseInt(day, 10)}`,
     startTime,
     endTime,
     range: `${dateLong} (${startTime} - ${endTime})`

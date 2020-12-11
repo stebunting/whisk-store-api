@@ -62,7 +62,7 @@
         const product = order.items[i];
         %><tr>
           <td class="item">
-            <a href="<%=storeUrl %>/product/<%=product.slug %>">
+            <a href="<%=storeUrl %>/product/<%=product.productSlug %>?utm_source=order-email&utm_medium=email&utm_campaign=order">
               <%=product.name %>
             </a>
             <div>

@@ -21,7 +21,7 @@
     "express": "^4.17.1",
     "luxon": "^1.25.0",
     "mongodb": "^3.6.3",
-    "nodemailer": "^6.4.16",
+    "nodemailer": "^6.4.17",
     "swish-merchant": "^0.0.9",
     "winston": "^3.3.3",
     "winston-mongodb": "^5.0.5"
@@ -44,6 +44,6 @@
     "eslint-plugin-import": "^2.22.1",
     "mocha": "^8.2.1",
     "nyc": "^15.1.0",
-    "sinon": "^9.2.1"
+    "sinon": "^9.2.2"
   }
 }

@@ -67,12 +67,13 @@
       "name": "ste",
       "email": "stebunting@gmail.com",
       "telephone": "07378978497324",
+      "address":"Sehlstedtsgatan, 115 28 Stockholm, Sweden",
       "notes": ""
     },
     "delivery": [],
     "items": [
       {
-        "productId": "5faafded3dcb1ac5af67870e",
+        "productSlug":"whisk-christmas-hamper",
         "name" : "Whisk Christmas Hamper",
         "grossPrice": 45000,
         "momsRate": 12,

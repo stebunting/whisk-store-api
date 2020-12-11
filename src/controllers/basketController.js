@@ -60,9 +60,11 @@ async function getBasket(basketId) {
 
   // Create delivery object for each item
   const delivery = {};
-  let allCollections = true;
+  let deliveryRequired = false;
   const items = basket.items.map((item) => {
     if (item.deliveryType === 'delivery') {
+      deliveryRequired = true;
+
       // Get date code and create details for this date if necessary
       const { code } = parseDateCode(item.deliveryDate);
       if (!delivery[code]) {
@@ -86,7 +88,6 @@ async function getBasket(basketId) {
       delivery[code].deliverable = delivery[code].deliverable
         && productDelivery.maxZone >= basket.delivery.zone;
     }
-    allCollections = allCollections && item.deliveryType !== 'delivery';
 
     return {
       ...item,
@@ -120,7 +121,7 @@ async function getBasket(basketId) {
 
   const deliveryObject = {
     ...basket.delivery,
-    allCollections,
+    deliveryRequired,
     details: deliveryDetails,
     deliverable: Object.keys(delivery).length > 0
       && Object.keys(delivery).reduce((acc, key) => acc && delivery[key].deliverable, true),

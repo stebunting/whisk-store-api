@@ -4,13 +4,16 @@ const tag = 'store-api:productsController';
 // Requirements
 const debug = require('debug')(tag);
 const log = require('winston');
-const { getProducts, getProductById } = require('./dbController');
+const {
+  getProducts,
+  getProductBySlug,
+} = require('./dbController');
 
 // Convert _id field to productId
 function mapProductsArray(products) {
   return products.map((product) => {
     const { _id: productId, ...rest } = product;
-    return ({ productId, ...rest });
+    return { productId, ...rest };
   });
 }
 
@@ -24,44 +27,40 @@ async function fetchProducts(req, res) {
     const products = mapProductsArray(data);
     return res.status(200).json({
       status: 'ok',
-      products
+      products,
     });
   } catch (error) {
     // Database Error
-    log.error('Error fetching products from database', { metadata: { tag, error } });
+    log.error('Error fetching products from database', {
+      metadata: { tag, error },
+    });
     return res.status(500).json({
-      status: 'error'
+      status: 'error',
     });
   }
 }
 
 // Route to fetch single product
 async function fetchProduct(req, res) {
-  const { productId } = req.params;
+  const { productSlug } = req.params;
 
   try {
     // Make DB Call
-    const data = await getProductById(productId);
-
-    // Check a product has been returned
-    if (data.length < 1) {
-      log.error('Could not find productId in database', { metadata: { tag, data } });
-      return res.status(400).json({
-        status: 'error'
-      });
-    }
+    const data = await getProductBySlug(productSlug);
 
     // Format product and return
-    const product = mapProductsArray(data);
+    const products = mapProductsArray(data);
     return res.status(200).json({
       status: 'ok',
-      product: product[0]
+      products,
     });
   } catch (error) {
     // Database Error
-    log.error('Error fetching product from database', { metadata: { tag, error } });
+    log.error('Error fetching product from database', {
+      metadata: { tag, error },
+    });
     return res.status(500).json({
-      status: 'error'
+      status: 'error',
     });
   }
 }

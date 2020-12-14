@@ -94,12 +94,9 @@ function addProduct(product) {
 }
 
 // Get Products from DB
-function getProducts(query = {}) {
+function getProducts(query = { available: true }) {
   return new Promise((resolve, reject) => (
-    db.collection(collections.products).find({
-      ...query,
-      available: true
-    }).toArray()
+    db.collection(collections.products).find(query).toArray()
       .then((data) => resolve(data))
       .catch((error) => reject(error))
   ));

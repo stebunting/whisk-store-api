@@ -2,6 +2,7 @@
   "products": [{
     "name": "Christmas Box",
     "slug": "whisk-christmas-hamper",
+    "available": true,
     "brand": "Whisk",
     "category": "Christmas",
     "description": "A Christmas Box",

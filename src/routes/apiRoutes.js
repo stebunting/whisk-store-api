@@ -27,7 +27,7 @@ function routes() {
 
   // Routes to get products
   apiRoutes.route('/products').get(fetchProducts);
-  apiRoutes.route('/product/:productId').get(fetchProduct); // Never Used?
+  apiRoutes.route('/product/:productSlug').get(fetchProduct); // Never Used?
 
   // Routes to set up baskets
   apiRoutes.route('/basket/:basketId').get(apiGetBasket);

@@ -10,7 +10,7 @@ const testData = require('./testData.json');
 
 describe('Product Calls...', () => {
   let getProductsStub;
-  let getProductByIdStub;
+  let getProductBySlugStub;
   let fetchProducts;
   let fetchProduct;
   let req;
@@ -26,13 +26,13 @@ describe('Product Calls...', () => {
 
   const resetStubs = () => {
     getProductsStub.resetHistory();
-    getProductByIdStub.resetHistory();
+    getProductBySlugStub.resetHistory();
   };
 
   before(() => {
     // Stubs
     getProductsStub = sinon.stub(db, 'getProducts');
-    getProductByIdStub = sinon.stub(db, 'getProductById');
+    getProductBySlugStub = sinon.stub(db, 'getProductBySlug');
 
     // File under test
     ({ fetchProducts, fetchProduct } = require('../src/controllers/productsController'));
@@ -41,7 +41,7 @@ describe('Product Calls...', () => {
   after(() => {
     // Restore Methods
     getProductsStub.restore();
-    getProductByIdStub.restore();
+    getProductBySlugStub.restore();
   });
 
   describe('to get list of products...', () => {
@@ -79,25 +79,28 @@ describe('Product Calls...', () => {
     beforeEach(setUpStubs);
     afterEach(resetStubs);
 
-    it('fails to get product with invalid id', async () => {
-      getProductByIdStub.returns([]);
-      req = mockObjects.request({ productId: 'invalidId' });
+    it('gets empty array with invalid slug', async () => {
+      getProductBySlugStub.returns([]);
+      req = mockObjects.request({ productSlug: 'invalidSlug' });
       await fetchProduct(req, res);
 
-      assert(getProductByIdStub.calledOnce);
-      assert(getProductByIdStub.calledWith('invalidId'));
-      assert(res.status.calledWith(400));
+      assert(getProductBySlugStub.calledOnce);
+      assert(getProductBySlugStub.calledWith('invalidSlug'));
+      assert(res.status.calledWith(200));
       assert(res.status.calledOnce);
-      assert(res.json.calledWith({ status: 'error' }));
       assert(res.json.calledOnce);
+
+      const jsonCall = res.json.getCall(0).args[0];
+      assert.strictEqual(jsonCall.status, 'ok');
+      assert.strictEqual(jsonCall.products.length, 0);
     });
 
     it('returns error when product list db call fails', async () => {
-      getProductByIdStub.rejects();
-      req = mockObjects.request({ productId: 'validId' });
+      getProductBySlugStub.rejects();
+      req = mockObjects.request({ productSlug: 'validSlug' });
       assert.rejects(await fetchProduct(req, res));
 
-      assert(getProductByIdStub.calledOnce);
+      assert(getProductBySlugStub.calledOnce);
       assert(res.status.calledWith(500));
       assert(res.status.calledOnce);
       assert(res.json.calledWith({ status: 'error' }));
@@ -105,20 +108,21 @@ describe('Product Calls...', () => {
     });
 
     it('gets product with valid id', async () => {
-      getProductByIdStub.returns([products[0]]);
-      req = mockObjects.request({ productId: 'validId' });
+      getProductBySlugStub.returns([products[0]]);
+      req = mockObjects.request({ productSlug: 'validSlug' });
       await fetchProduct(req, res);
 
-      assert(getProductByIdStub.calledOnce);
-      assert(getProductByIdStub.calledWith('validId'));
+      assert(getProductBySlugStub.calledOnce);
+      assert(getProductBySlugStub.calledWith('validSlug'));
       assert(res.status.calledWith(200));
       assert(res.status.calledOnce);
 
       const jsonCall = res.json.getCall(0).args[0];
       assert.strictEqual(jsonCall.status, 'ok');
-      assert.strictEqual(jsonCall.product.name, 'Christmas Box');
-      assert.strictEqual(jsonCall.product.description, 'A Christmas Box');
-      assert.strictEqual(jsonCall.product.grossPrice, 39500);
+      assert.strictEqual(jsonCall.products.length, 1);
+      assert.strictEqual(jsonCall.products[0].name, 'Christmas Box');
+      assert.strictEqual(jsonCall.products[0].description, 'A Christmas Box');
+      assert.strictEqual(jsonCall.products[0].grossPrice, 39500);
       assert(res.json.calledOnce);
     });
   });

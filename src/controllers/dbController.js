@@ -111,7 +111,7 @@ function getProductById(id) {
   return getProducts({ _id: ObjectId(id) });
 }
 function getProductBySlug(slug) {
-  return getProducts({ _id: ObjectId(slug), slug });
+  return getProducts({ slug });
 }
 
 // Get Number of Products

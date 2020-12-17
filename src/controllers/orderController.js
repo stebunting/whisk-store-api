@@ -24,14 +24,14 @@ const production = {
   key: JSON.parse(`"${process.env.SWISH_KEY}"`)
 };
 
-const test = {
-  alias: process.env.TEST_SWISH_ALIAS,
-  cert: JSON.parse(`"${process.env.TEST_SWISH_CERT}"`),
-  key: JSON.parse(`"${process.env.TEST_SWISH_KEY}"`),
-  ca: JSON.parse(`"${process.env.TEST_SWISH_CA}"`),
-  password: 'swish',
-  test: true
-};
+// const test = {
+//   alias: process.env.TEST_SWISH_ALIAS,
+//   cert: JSON.parse(`"${process.env.TEST_SWISH_CERT}"`),
+//   key: JSON.parse(`"${process.env.TEST_SWISH_KEY}"`),
+//   ca: JSON.parse(`"${process.env.TEST_SWISH_CA}"`),
+//   password: 'swish',
+//   test: true
+// };
 
 const swish = new Swish({
   ...production,
@@ -165,6 +165,7 @@ function orderController() {
 
         await updateOrder(orderId, {
           $set: {
+            'payment.refunds': [],
             'payment.status': status.CREATED,
             'payment.swish': {
               id: swishId,

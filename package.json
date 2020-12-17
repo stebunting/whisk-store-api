@@ -22,7 +22,7 @@
     "luxon": "^1.25.0",
     "mongodb": "^3.6.3",
     "nodemailer": "^6.4.17",
-    "swish-merchant": "^0.0.9",
+    "swish-merchant": "^0.1.0",
     "winston": "^3.3.3",
     "winston-mongodb": "^5.0.5"
   },

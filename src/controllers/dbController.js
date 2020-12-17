@@ -74,12 +74,16 @@ function getCursor(collection) {
 function setUpDB() {
   return new Promise((resolve, reject) => (
     db.collection(collections.orders).createIndex(
-      { 'swish.id': 1 },
-      { sparse: true }
-    ).then(() => db.collection(collections.products).createIndex(
+      { 'payment.swish.id': 1 },
+      { unique: true, sparse: true }
+    ).then(() => db.collection(collections.orders).createIndex(
+      { 'payment.refunds.id': 1 },
+      { unique: true, sparse: true }
+    )).then(() => db.collection(collections.products).createIndex(
       { slug: 1 },
       { unique: true }
-    )).then((data) => resolve(data))
+    ))
+      .then((data) => resolve(data))
       .catch((error) => reject(error))
   ));
 }
@@ -107,7 +111,7 @@ function getProductById(id) {
   return getProducts({ _id: ObjectId(id) });
 }
 function getProductBySlug(slug) {
-  return getProducts({ slug });
+  return getProducts({ _id: ObjectId(slug), slug });
 }
 
 // Get Number of Products
@@ -225,7 +229,7 @@ function updateOrder(orderId, query) {
   return new Promise((resolve, reject) => (
     db.collection(collections.orders).updateOne(
       { _id: ObjectId(orderId) },
-      { $set: query }
+      query
     )
       .then((data) => resolve(data))
       .catch((error) => reject(error))
@@ -267,6 +271,16 @@ function updateSwishPayment(payment) {
   ));
 }
 
+function updateSwishRefund(refund) {
+  return new Promise((resolve, reject) => {
+    db.collection(collections.orders).updateOne(
+      { 'payment.refunds.id': refund.id },
+      { $set: { 'payment.refunds.$': refund } }
+    ).then((data) => resolve(data))
+      .catch((error) => reject(error));
+  });
+}
+
 // Get Admin User from DB
 function getAdminUser(username) {
   return new Promise((resolve, reject) => (
@@ -303,5 +317,6 @@ module.exports = {
   getOrderById,
   getSwishStatus,
   updateSwishPayment,
+  updateSwishRefund,
   getAdminUser
 };

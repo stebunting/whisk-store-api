@@ -230,7 +230,12 @@ describe('Database repository...', () => {
     beforeEach(setupTest);
 
     it('contains Swish ID index in order collection', async () => {
-      const indexExists = await getCursor('orders').indexExists('swish.id_1');
+      const indexExists = await getCursor('orders').indexExists('payment.swish.id_1');
+      assert(indexExists);
+    });
+
+    it('contains Swish Refund ID index in order refunds collection', async () => {
+      const indexExists = await getCursor('orders').indexExists('payment.refunds.id_1');
       assert(indexExists);
     });
 
@@ -257,7 +262,11 @@ describe('Database repository...', () => {
       const addResponse = await addOrder(order);
       const { insertedId } = addResponse;
 
-      const response = await updateOrder(insertedId, { 'payment.confirmationEmailSent': true });
+      const response = await updateOrder(insertedId, {
+        $set: {
+          'payment.confirmationEmailSent': true
+        }
+      });
       assert.strictEqual(response.modifiedCount, 1);
 
       const getResponse = await getOrderById(insertedId);

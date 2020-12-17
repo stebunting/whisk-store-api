@@ -10,6 +10,7 @@ const {
   addOrder,
   getSwishStatus,
   updateSwishPayment,
+  updateSwishRefund,
   updateOrder,
   getAllOrders,
   getOrderById
@@ -17,11 +18,25 @@ const {
 const { sendConfirmationEmail } = require('./emailController');
 const status = require('./orderStatuses');
 
-const swish = new Swish({
+const production = {
   alias: process.env.SWISH_ALIAS,
-  paymentRequestCallback: `${process.env.SWISH_CALLBACK}/api/order/swish/callback`,
   cert: JSON.parse(`"${process.env.SWISH_CERT}"`),
   key: JSON.parse(`"${process.env.SWISH_KEY}"`)
+};
+
+const test = {
+  alias: process.env.TEST_SWISH_ALIAS,
+  cert: JSON.parse(`"${process.env.TEST_SWISH_CERT}"`),
+  key: JSON.parse(`"${process.env.TEST_SWISH_KEY}"`),
+  ca: JSON.parse(`"${process.env.TEST_SWISH_CA}"`),
+  password: 'swish',
+  test: true
+};
+
+const swish = new Swish({
+  ...production,
+  paymentRequestCallback: `${process.env.SWISH_CALLBACK}/api/order/swish/paymentCallback`,
+  refundRequestCallback: `${process.env.SWISH_CALLBACK}/api/order/swish/refundCallback`
 });
 
 function orderController() {
@@ -29,6 +44,17 @@ function orderController() {
     try {
       const orders = await getAllOrders();
       return res.status(200).json({ status: 'ok', orders });
+    } catch (error) {
+      return res.status(400).json({ status: 'error' });
+    }
+  }
+
+  async function getOrder(req, res) {
+    const { orderId } = req.params;
+
+    try {
+      const order = await getOrderById(orderId);
+      return res.status(200).json({ status: 'ok', order: order.length > 0 ? order[0] : null });
     } catch (error) {
       return res.status(400).json({ status: 'error' });
     }
@@ -110,7 +136,7 @@ function orderController() {
       sendConfirmationEmail(order)
         .then((emailSent) => updateOrder(
           orderId,
-          { 'payment.confirmationEmailSent': emailSent }
+          { $set: { 'payment.confirmationEmailSent': emailSent } }
         ));
 
       return res.json({
@@ -138,10 +164,12 @@ function orderController() {
         const { id: swishId } = response;
 
         await updateOrder(orderId, {
-          'payment.status': status.CREATED,
-          'payment.swish': {
-            id: swishId,
-            status: status.CREATED
+          $set: {
+            'payment.status': status.CREATED,
+            'payment.swish': {
+              id: swishId,
+              status: status.CREATED
+            }
           }
         });
 
@@ -180,7 +208,7 @@ function orderController() {
   }
 
   // Swish Callback Function
-  async function swishCallback(req, res) {
+  async function swishPaymentCallback(req, res) {
     const { body } = req;
     const { payeePaymentReference: orderId } = body;
 
@@ -194,15 +222,20 @@ function orderController() {
             return sendConfirmationEmail(order)
               // Update Success Order Status
               .then((emailSent) => updateOrder(
-                orderId,
-                {
-                  'payment.status': body.status,
-                  'payment.confirmationEmailSent': emailSent
+                orderId, {
+                  $set: {
+                    'payment.status': body.status,
+                    'payment.confirmationEmailSent': emailSent
+                  }
                 }
               ));
           }
           // Update Non-Success Order Status
-          return updateOrder(orderId, { 'payment.status': body.status });
+          return updateOrder(orderId, {
+            $set: {
+              'payment.status': body.status
+            }
+          });
         }))
       .catch((error) => debug(error));
     return res.status(200).json({ status: 'thanks very much' });
@@ -214,7 +247,11 @@ function orderController() {
       return res.status(400).json({ status: 'error' });
     }
 
-    await updateOrder(body.orderId, { 'payment.status': body.status });
+    await updateOrder(body.orderId, {
+      $set: {
+        'payment.status': body.status
+      }
+    });
     const orders = await getOrderById(body.orderId);
     if (orders.length > 0) {
       return res.status(200).json({ status: 'ok', order: orders[0] });
@@ -222,12 +259,85 @@ function orderController() {
     return res.status(400).json({ status: 'error' });
   }
 
+  // Function to check refund status
+  async function checkRefund(refundId) {
+    try {
+      const response = await swish.retrieveRefundRequest({
+        id: refundId
+      });
+      await updateSwishRefund(response.data);
+      return response.data;
+    } catch (error) {
+      debug(error.errors);
+    }
+    return null;
+  }
+
+  // Function to start a refund
+  async function sendRefund(req, res, next) {
+    const { body } = req;
+    if (!body.orderId || !body.amount) {
+      // INVALID ORDER
+    }
+
+    const { orderId, amount } = body;
+    let order = await getOrderById(orderId);
+    if (order.length < 1) {
+      // Invalid order
+    } else {
+      [order] = order;
+    }
+
+    const { paymentReference: originalPaymentReference } = order.payment.swish;
+    let refundId = '';
+    try {
+      const response = await swish.createRefundRequest({
+        originalPaymentReference,
+        amount,
+        payerPaymentReference: orderId
+      });
+      refundId = response.id;
+      await updateOrder(orderId, {
+        $push: {
+          'payment.refunds': { id: refundId }
+        }
+      });
+    } catch (error) {
+      debug(error.errors);
+    }
+    req.params.refundId = refundId;
+    next();
+  }
+
+  // Swish Refund Callback Function
+  async function swishRefundCallback(req, res) {
+    updateSwishRefund(req.body);
+    return res.status(200).json({ status: 'thanks very much' });
+  }
+
+  async function apiCheckRefund(req, res, next) {
+    const { refundId } = req.params;
+
+    try {
+      const response = await checkRefund(refundId);
+      req.params.orderId = response.payerPaymentReference;
+    } catch (error) {
+      debug(error.errors);
+      return res.status(400).json({ status: 'error' });
+    }
+    return next();
+  }
+
   return {
     getOrders,
+    getOrder,
     createOrder,
     checkPaymentStatus,
-    swishCallback,
-    setStatus
+    swishPaymentCallback,
+    swishRefundCallback,
+    setStatus,
+    sendRefund,
+    apiCheckRefund
   };
 }
 

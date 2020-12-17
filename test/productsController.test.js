@@ -24,10 +24,7 @@ describe('Product Calls...', () => {
     res = mockObjects.response();
   };
 
-  const resetStubs = () => {
-    getProductsStub.resetHistory();
-    getProductBySlugStub.resetHistory();
-  };
+  const resetStubs = () => sinon.resetHistory();
 
   before(() => {
     // Stubs
@@ -38,11 +35,7 @@ describe('Product Calls...', () => {
     ({ fetchProducts, fetchProduct } = require('../src/controllers/productsController'));
   });
 
-  after(() => {
-    // Restore Methods
-    getProductsStub.restore();
-    getProductBySlugStub.restore();
-  });
+  after(() => sinon.restore());
 
   describe('to get list of products...', () => {
     beforeEach(setUpStubs);

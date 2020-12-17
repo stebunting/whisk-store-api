@@ -59,7 +59,7 @@ async function getBasket(basketId) {
   await Promise.all(promises);
 
   // Create delivery object for each item
-  const delivery = {};
+  const deliveryDataObject = {};
   let deliveryRequired = false;
   const items = basket.items.map((item) => {
     if (item.deliveryType === 'delivery') {
@@ -67,8 +67,8 @@ async function getBasket(basketId) {
 
       // Get date code and create details for this date if necessary
       const { code } = parseDateCode(item.deliveryDate);
-      if (!delivery[code]) {
-        delivery[code] = {
+      if (!deliveryDataObject[code]) {
+        deliveryDataObject[code] = {
           products: [],
           maxZone: 0,
           deliverable: true
@@ -77,15 +77,18 @@ async function getBasket(basketId) {
 
       // Add new product object for this item and update fields
       const productDelivery = item.details.delivery;
-      delivery[code].products.push({
+      deliveryDataObject[code].products.push({
         slug: item.details.slug,
         quantity: item.quantity,
         deliveryCost: productDelivery.costs[basket.delivery.zone]
           ? productDelivery.costs[basket.delivery.zone].price
           : 0
       });
-      delivery[code].maxZone = Math.max(productDelivery.maxZone, delivery[code].maxZone);
-      delivery[code].deliverable = delivery[code].deliverable
+      deliveryDataObject[code].maxZone = Math.max(
+        productDelivery.maxZone,
+        deliveryDataObject[code].maxZone
+      );
+      deliveryDataObject[code].deliverable = deliveryDataObject[code].deliverable
         && productDelivery.maxZone >= basket.delivery.zone;
     }
 
@@ -101,9 +104,9 @@ async function getBasket(basketId) {
   // Loop over date codes in delivery object
   // Get lowest cost for each days delivery
   let deliveryTotal = 0;
-  const deliveryDetails = Object.keys(delivery).reduce((acc, date) => {
+  const deliveryDetails = Object.keys(deliveryDataObject).reduce((acc, date) => {
     // Get minimum price for each date
-    const info = delivery[date];
+    const info = deliveryDataObject[date];
     const total = info.products.reduce((minimum, product) => {
       if (product.deliveryCost < minimum) return product.deliveryCost;
       return minimum;
@@ -119,24 +122,22 @@ async function getBasket(basketId) {
     return acc;
   }, {});
 
-  const deliveryObject = {
+  const delivery = {
     ...basket.delivery,
     deliveryRequired,
     details: deliveryDetails,
-    deliverable: Object.keys(delivery).length > 0
-      && Object.keys(delivery).reduce((acc, key) => acc && delivery[key].deliverable, true),
+    deliverable: Object.keys(deliveryDataObject).length > 0 && Object.keys(deliveryDataObject)
+      .reduce((acc, key) => acc && deliveryDataObject[key].deliverable, true),
     momsRate: 25,
     deliveryTotal,
   };
 
-  const b = {
-    ...basket,
+  return {
     basketId: basket._id,
     items,
-    delivery: deliveryObject,
-    statement: getStatement(items, deliveryObject)
+    delivery,
+    statement: getStatement(items, delivery)
   };
-  return b;
 }
 
 async function createBasket() {
@@ -169,7 +170,7 @@ async function apiGetBasket(req, res) {
 }
 
 // Method to create an empty basket
-async function apiCreateBasket(req, res, next) {
+async function apiCreateBasket(req, _res, next) {
   const basketId = await createBasket();
   req.params.id = basketId;
   next();
@@ -202,7 +203,7 @@ async function removeFromBasket(req, res, next) {
   next();
 }
 
-function apiDeleteBasket(req, res, next) {
+function apiDeleteBasket(req, _res, next) {
   const { basketId } = req.params;
   removeBasketById(basketId);
   next();

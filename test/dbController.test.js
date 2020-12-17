@@ -23,7 +23,9 @@ const {
   getSwishStatus,
   updateSwishPayment,
   updateOrder,
-  cleanupBaskets
+  cleanupBaskets,
+  getAllOrders,
+  removeOrder
 } = require('../src/controllers/dbController');
 
 describe('Database repository...', () => {
@@ -272,6 +274,21 @@ describe('Database repository...', () => {
       const getResponse = await getOrderById(insertedId);
       assert.strictEqual(getResponse.length, 1);
       assert(getResponse[0].payment.confirmationEmailSent);
+    });
+
+    it('successfully removes an order', async () => {
+      const order = orders[0];
+      const addResponse = await addOrder(order);
+      const { insertedId } = addResponse;
+
+      let numOrders = await count('orders');
+      assert.strictEqual(numOrders, 1);
+
+      const removeResponse = await removeOrder(insertedId);
+      assert.strictEqual(removeResponse.deletedCount, 1);
+
+      numOrders = await count('orders');
+      assert.strictEqual(numOrders, 0);
     });
 
     it('successfully updates order payment status', async () => {

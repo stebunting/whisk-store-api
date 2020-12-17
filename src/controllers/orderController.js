@@ -12,6 +12,7 @@ const {
   updateSwishPayment,
   updateSwishRefund,
   updateOrder,
+  removeOrder,
   getAllOrders,
   getOrderById
 } = require('./dbController');
@@ -151,9 +152,11 @@ function orderController() {
 
     // Swish Payment
     if (order.payment.method === 'swish') {
+      let orderId;
+      let swishId;
       try {
         const orderResponse = await addOrder(order);
-        const { insertedId: orderId } = orderResponse;
+        orderId = orderResponse.insertedId;
 
         const response = await swish.createPaymentRequest({
           phoneNumber: order.details.telephone,
@@ -161,8 +164,21 @@ function orderController() {
           payeePaymentReference: orderId.toString(),
           message: ''
         });
-        const { id: swishId } = response;
+        swishId = response.id;
+      } catch (error) {
+        // If Swish Payment fails, remove order
+        if (orderId) removeOrder(orderId);
 
+        return res.json({
+          status: 'ok',
+          order: {
+            status: 'ERROR',
+            ...error.errors[0]
+          }
+        });
+      }
+
+      try {
         await updateOrder(orderId, {
           $set: {
             'payment.refunds': [],

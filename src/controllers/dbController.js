@@ -236,6 +236,16 @@ function updateOrder(orderId, query) {
   ));
 }
 
+// Remove an order
+function removeOrder(orderId) {
+  return new Promise((resolve, reject) => (
+    db.collection(collections.orders).deleteOne({
+      _id: ObjectId(orderId)
+    }).then((data) => resolve(data))
+      .catch((error) => reject(error))
+  ));
+}
+
 // Get Order from DB
 function getAllOrders(query = {}) {
   return new Promise((resolve, reject) => (
@@ -313,6 +323,7 @@ module.exports = {
   cleanupBaskets,
   addOrder,
   updateOrder,
+  removeOrder,
   getAllOrders,
   getOrderById,
   getSwishStatus,

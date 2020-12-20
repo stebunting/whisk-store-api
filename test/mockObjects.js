@@ -1,7 +1,8 @@
 const sinon = require('sinon');
 
-const request = (params = {}) => ({
-  params
+const request = (params = {}, body = {}) => ({
+  params,
+  body
 });
 
 const response = () => {

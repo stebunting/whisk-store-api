@@ -30,16 +30,19 @@ function routes() {
   const apiRoutes = express.Router();
 
   // Routes to get products
+  // Get all available products
   apiRoutes.route('/products').get(fetchProducts);
-  apiRoutes.route('/product/:productSlug').get(fetchProduct); // Never Used?
+
+  // Get a single product
+  apiRoutes.route('/product/:productSlug').get(fetchProduct);
 
   // Routes to set up baskets
   apiRoutes.route('/basket/:basketId').get(apiGetBasket);
   apiRoutes.route('/basket').post(apiCreateBasket, apiGetBasket);
+  apiRoutes.route('/basket/:basketId').delete(apiDeleteBasket, apiCreateBasket, apiGetBasket);
   apiRoutes.route('/basket/update/zone/:basketId').put(updateZoneBasket, apiGetBasket);
   apiRoutes.route('/basket/update/quantity/:basketId').put(updateBasket, apiGetBasket);
   apiRoutes.route('/basket/update/remove/:basketId').put(removeFromBasket, apiGetBasket);
-  apiRoutes.route('/basket/:basketId').delete(apiDeleteBasket, apiCreateBasket, apiGetBasket);
 
   // Order Routes
   apiRoutes.route('/order/:basketId').post(createOrder);

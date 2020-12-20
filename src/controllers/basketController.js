@@ -31,37 +31,43 @@ function getStatement(items, delivery) {
   return { bottomLine };
 }
 
-async function getBasket(basketId) {
-  // Get Basket from database by id
-  let basket = await getBasketById(basketId);
-  if (!basket || basket.length < 1) {
-    log.error('Attempting to retrieve invalid basket from db', { metadata: { tag, basketId } });
-    throw new Error('No such basket');
-  } else {
-    [basket] = basket;
-  }
-
-  // Add product information for each item in basket to item.details
+// Add product information for each item in basket to item.details
+async function getItems(items) {
   const promises = [];
-  for (let i = 0; i < basket.items.length; i += 1) {
-    promises.push(getProductBySlug(basket.items[i].productSlug)
+  const newItems = [];
+
+  for (let i = 0; i < items.length; i += 1) {
+    const item = items[i];
+
+    promises.push(getProductBySlug(item.productSlug)
       .then((product) => {
         if (product.length > 0) {
-          [basket.items[i].details] = product;
+          const [details] = product;
+          newItems[i] = {
+            ...item,
+            details,
+            name: details.name,
+            linePrice: item.quantity * details.grossPrice,
+            momsRate: details.momsRate,
+            grossPrice: details.grossPrice
+          };
         } else {
           throw Error('Got 0 length array while getting all products from basket');
         }
       }).catch((error) => {
-        log.error('Could not get all products from basket', { metadata: { tag, error, basketId } });
         throw error;
       }));
   }
   await Promise.all(promises);
+  return newItems;
+}
 
-  // Create delivery object for each item
+// Method to create delivery and items object from basket
+function createDelivery(basket, items) {
   const deliveryDataObject = {};
   let deliveryRequired = false;
-  const items = basket.items.map((item) => {
+
+  items.forEach((item) => {
     if (item.deliveryType === 'delivery') {
       deliveryRequired = true;
 
@@ -91,14 +97,6 @@ async function getBasket(basketId) {
       deliveryDataObject[code].deliverable = deliveryDataObject[code].deliverable
         && productDelivery.maxZone >= basket.delivery.zone;
     }
-
-    return {
-      ...item,
-      name: item.details.name,
-      linePrice: item.quantity * item.details.grossPrice,
-      momsRate: item.details.momsRate,
-      grossPrice: item.details.grossPrice
-    };
   });
 
   // Loop over date codes in delivery object
@@ -122,7 +120,7 @@ async function getBasket(basketId) {
     return acc;
   }, {});
 
-  const delivery = {
+  return {
     ...basket.delivery,
     deliveryRequired,
     details: deliveryDetails,
@@ -131,12 +129,31 @@ async function getBasket(basketId) {
     momsRate: 25,
     deliveryTotal,
   };
+}
+
+async function getBasket(basketId) {
+  // Get Basket from database by id
+  let basket = await getBasketById(basketId);
+  if (!basket || basket.length < 1) {
+    log.error('Attempting to retrieve invalid basket from db', { metadata: { tag, basketId } });
+    throw new Error('No such basket');
+  }
+
+  [basket] = basket;
+  let items;
+  try {
+    items = await getItems(basket.items);
+  } catch (error) {
+    log.error('Could not get all products from basket', { metadata: { tag, error, basketId } });
+  }
+  const delivery = createDelivery(basket, items);
+  const statement = getStatement(items, delivery);
 
   return {
     basketId: basket._id,
     items,
     delivery,
-    statement: getStatement(items, delivery)
+    statement
   };
 }
 
@@ -153,7 +170,6 @@ async function apiGetBasket(req, res) {
   const { basketId } = req.params;
 
   try {
-    // DB Call
     const basket = await getBasket(basketId);
     return res.status(200).json({
       status: 'ok',
@@ -177,7 +193,7 @@ async function apiCreateBasket(req, _res, next) {
 }
 
 // Method to update a basket
-async function updateBasket(req, res, next) {
+async function updateBasket(req, _res, next) {
   const { basketId } = req.params;
   const { body } = req;
 
@@ -195,7 +211,7 @@ async function updateZoneBasket(req, res, next) {
 }
 
 // Method to remove an item from a basket
-async function removeFromBasket(req, res, next) {
+async function removeFromBasket(req, _res, next) {
   const { basketId } = req.params;
   const { body } = req;
 

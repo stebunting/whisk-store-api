@@ -1,21 +1,28 @@
+// Requirements
+import nodemailer, { SentMessageInfo } from 'nodemailer';
+import ejs from 'ejs';
+import log from 'winston';
+import Debug from 'debug';
+import Mail from 'nodemailer/lib/mailer';
+
+// Types
+import { Order } from '../types/Order';
+
+// Functions
+import { priceFormat, parseDateCode, capitaliseFirst } from '../functions/helpers';
+
 // Page Tag
 const tag = 'store-api:emailController';
-
-// Requirements
-const nodemailer = require('nodemailer');
-const ejs = require('ejs');
-const log = require('winston');
-const debug = require('debug')(tag);
-const { priceFormat, parseDateCode, capitaliseFirst } = require('../functions/helpers');
+const debug = Debug(tag);
 
 // Global Variables
 const smtpServer = process.env.SMTP_SERVER;
 const smtpUsername = process.env.SMTP_USERNAME;
 const smtpPassword = process.env.SMTP_PASSWORD;
 const sender = process.env.EMAIL_FROM;
-let transporter;
+let transporter: Mail;
 
-function isConnected() {
+function isConnected(): Promise<boolean> {
   return new Promise((resolve, reject) => {
     if (transporter == null) {
       log.error('Attempting to use emailer while disconnected', { metadata: { tag } });
@@ -30,7 +37,7 @@ function isConnected() {
   });
 }
 
-function connect() {
+function connect(): Promise<boolean> {
   transporter = nodemailer.createTransport({
     host: smtpServer,
     port: 465,
@@ -50,7 +57,7 @@ function connect() {
   });
 }
 
-function sendEmail(config) {
+function sendEmail(config: Mail.Options): Promise<SentMessageInfo> {
   return new Promise((resolve, reject) => {
     isConnected().then((data) => {
       if (data) {
@@ -66,9 +73,9 @@ function sendEmail(config) {
   });
 }
 
-async function sendConfirmationEmail(order) {
-  let html;
-  let text;
+async function sendConfirmationEmail(order: Order): Promise<boolean> {
+  let html = '';
+  let text = '';
   try {
     html = await ejs.renderFile('src/templates/orderConfirmationEmail.ejs', {
       order,
@@ -106,4 +113,8 @@ async function sendConfirmationEmail(order) {
   }
 }
 
-module.exports = { isConnected, connect, sendConfirmationEmail };
+export {
+  isConnected,
+  connect,
+  sendConfirmationEmail
+};

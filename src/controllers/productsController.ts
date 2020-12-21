@@ -1,24 +1,28 @@
+// Requirements
+import log from 'winston';
+import Debug from 'debug';
+import { Request, Response } from 'express-serve-static-core';
+
+// Types
+import { Product } from '../types/Product';
+
+// Controllers
+import { getProducts, getProductBySlug } from './dbController';
+
 // Page Tag
 const tag = 'store-api:productsController';
-
-// Requirements
-const debug = require('debug')(tag);
-const log = require('winston');
-const {
-  getProducts,
-  getProductBySlug,
-} = require('./dbController');
+const debug = Debug(tag);
 
 // Convert _id field to productId
-function mapProductsArray(products) {
+function mapProductsArray(products: Array<Product>) {
   return products.map((product) => {
     const { _id: productId, ...rest } = product;
-    return { productId, ...rest };
+    return { ...rest, productId };
   });
 }
 
 // Route to fetch all products
-async function fetchProducts(req, res) {
+async function fetchProducts(_req: Request, res: Response): Promise<Response> {
   try {
     // Make DB Call
     const data = await getProducts();
@@ -41,7 +45,7 @@ async function fetchProducts(req, res) {
 }
 
 // Route to fetch single product
-async function fetchProduct(req, res) {
+async function fetchProduct(req: Request, res: Response): Promise<Response> {
   const { productSlug } = req.params;
 
   try {
@@ -65,4 +69,4 @@ async function fetchProduct(req, res) {
   }
 }
 
-module.exports = { fetchProducts, fetchProduct };
+export { fetchProducts, fetchProduct };

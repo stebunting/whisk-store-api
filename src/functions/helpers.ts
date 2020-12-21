@@ -1,16 +1,23 @@
 // Requirements
-const { DateTime } = require('luxon');
+import { DateTime } from 'luxon';
 
 // Function to calculate MOMs amount from a final sale price (rounded to nearest krona)
-function calculateMoms(gross, momsRate) {
+function calculateMoms(gross: number, momsRate: number): number {
   const decimalRate = 1 + (momsRate / 100);
   return Math.round(gross - (gross / decimalRate));
 }
 
-function priceFormat(n, userOptions = {}) {
-  const options = {
-    includeOre: userOptions.includeOre || false
+interface PriceFormatOptions {
+  includeOre?: boolean,
+  includeSymbol?: boolean
+}
+
+function priceFormat(n: number, userOptions = {} as PriceFormatOptions): string {
+  const options: PriceFormatOptions = {
+    includeOre: userOptions.includeOre || false,
+    includeSymbol: true
   };
+
   if (userOptions.includeSymbol === false) {
     options.includeSymbol = false;
   } else {
@@ -26,9 +33,24 @@ function priceFormat(n, userOptions = {}) {
   return str;
 }
 
+interface DateCode {
+  datetime: DateTime,
+  dateLong: string,
+  year: number,
+  month: number,
+  date: number,
+  code: string,
+  startTime: string,
+  endTime: string,
+  range: string
+}
+
 // Parse Date Code
-function parseDateCode(code) {
-  const [year, month, day, startTime, endTime] = code.split('-');
+function parseDateCode(code: string): DateCode {
+  const [yearStr, monthStr, dayStr, startTime, endTime] = code.split('-');
+  const year = parseInt(yearStr, 10);
+  const month = parseInt(monthStr, 10);
+  const day = parseInt(dayStr, 10);
   const datetime = DateTime.fromObject({ year, month, day });
   const dateLong = datetime.toLocaleString({
     weekday: 'long',
@@ -38,10 +60,10 @@ function parseDateCode(code) {
   return {
     datetime,
     dateLong,
-    year: parseInt(year, 10),
-    month: parseInt(month, 10),
-    date: parseInt(day, 10),
-    code: `${parseInt(year, 10)}-${parseInt(month, 10)}-${parseInt(day, 10)}`,
+    year,
+    month,
+    date: day,
+    code: `${year}-${month}-${day}`,
     startTime,
     endTime,
     range: `${dateLong} (${startTime} - ${endTime})`
@@ -49,11 +71,11 @@ function parseDateCode(code) {
 }
 
 // Capitalise first letter in word
-function capitaliseFirst(word) {
+function capitaliseFirst(word: string): string {
   return `${word.charAt(0).toUpperCase()}${word.substring(1).toLowerCase()}`;
 }
 
-module.exports = {
+export {
   calculateMoms,
   priceFormat,
   parseDateCode,

@@ -1,16 +1,20 @@
+// Requirements
+import bcrypt from 'bcrypt';
+import log from 'winston';
+import Debug from 'debug';
+import { Request, Response, NextFunction } from 'express-serve-static-core';
+
+// Controllers
+import { getAdminUser } from './dbController';
+
 // Page Tag
 const tag = 'store-api:authController';
-
-// Requirements
-const bcrypt = require('bcrypt');
-const { log } = require('winston');
-const debug = require('debug')(tag);
-const { getAdminUser } = require('./dbController');
+const debug = Debug(tag);
 
 // Global Variables
-const key = process.env.ADMIN_KEY;
+const key = process.env.ADMIN_KEY || '';
 
-async function login(req, res) {
+async function login(req: Request, res: Response): Promise<Response> {
   const { username, password } = req.body;
   const adminUsers = await getAdminUser(username.toLowerCase());
 
@@ -27,12 +31,14 @@ async function login(req, res) {
     : res.status(200).json({ status: 'ok', login: false });
 }
 
-function checkAdminKey(req, res, next) {
+function checkAdminKey(
+  req: Request, res: Response, next?: NextFunction
+): void | Response {
   const { authorization } = req.headers;
-  if (authorization && authorization === `Basic ${key}`) {
+  if (authorization && authorization === `Basic ${key}` && next) {
     return next();
   }
   return res.json({ status: 'error' });
 }
 
-module.exports = { login, checkAdminKey };
+export { login, checkAdminKey };

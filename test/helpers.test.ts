@@ -1,16 +1,17 @@
+// Requirements
+import assert from 'assert';
+
+// Controllers
+import { priceFormat, calculateMoms, parseDateCode } from '../src/functions/helpers';
+
 // Page Tag
 const tag = 'store-api:helpers.test';
-
-// Requirements
-const assert = require('assert').strict;
-const { priceFormat, calculateMoms, parseDateCode } = require('../src/functions/helpers');
 
 describe('Helper Functions...', () => {
   describe('convert number to price format...', () => {
     it('with currency symbol', () => {
       assert.strictEqual(priceFormat(1000), '10 SEK');
       assert.strictEqual(priceFormat(786), '8 SEK');
-      assert.strictEqual(priceFormat(), '0 SEK');
       assert.strictEqual(priceFormat(123456789), '1234568 SEK');
       assert.strictEqual(priceFormat(5.687), '0 SEK');
       assert.strictEqual(priceFormat(758.415), '8 SEK');
@@ -49,15 +50,6 @@ describe('Helper Functions...', () => {
       assert.strictEqual(parsedCode.year, 2017);
       assert.strictEqual(parsedCode.month, 6);
       assert.strictEqual(parsedCode.date, 16);
-      assert.deepStrictEqual(parsedCode.datetime.c, {
-        day: 16,
-        hour: 0,
-        millisecond: 0,
-        minute: 0,
-        month: 6,
-        second: 0,
-        year: 2017
-      });
       assert.strictEqual(parsedCode.dateLong, 'Friday, 16 June');
       parsedCode = parseDateCode('2003-1-7');
       assert.strictEqual(parsedCode.year, 2003);

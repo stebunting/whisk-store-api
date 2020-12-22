@@ -52,7 +52,4 @@ export interface Basket extends DbBasket {
   items: Array<BasketItem>,
   delivery: BasketDelivery,
   statement: Statement
-
-  // THIS IS THE SAME AS BASKETID, CAN BE REMOVED
-  _id?: string,
 }

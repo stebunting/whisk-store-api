@@ -1,8 +1,9 @@
 // Requirements
-const assert = require('assert').strict;
-const { ObjectId } = require('mongodb');
-const testData = require('./testData.json');
-const {
+import assert from 'assert';
+import { ObjectId } from 'mongodb';
+
+// Controllers
+import {
   connect,
   test,
   isConnected,
@@ -24,14 +25,30 @@ const {
   updateSwishPayment,
   updateOrder,
   cleanupBaskets,
-  getAllOrders,
   removeOrder
-} = require('../src/controllers/dbController');
+} from '../src/controllers/dbController';
+
+// Types
+// import { Basket } from '../src/types/Basket';
+import { Order } from '../src/types/Order';
+import { Product } from '../src/types/Product';
+import { SwishPayload } from '../src/types/SwishPayload';
+
+// Data
+const testData = require('./testData.json');
+
+// interface TestData {
+//   products: Array<Product>,
+//   baskets: Array<Basket>,
+//   orders: Array<Order>,
+//   swishPayments: Array<SwishPayload>
+// }
+// const testData = json as TestData;
 
 describe('Database repository...', () => {
-  let products;
-  let orders;
-  let swishPayments;
+  let products: Array<Product>;
+  let orders: Array<Order>;
+  let swishPayments: Array<SwishPayload>;
 
   before('Connect to MongoDB', async () => {
     await connect();
@@ -120,17 +137,17 @@ describe('Database repository...', () => {
       const addResponse = await addBasket();
       const { insertedId: id } = addResponse;
 
-      const response = await getBasketById(id);
+      const response = await getBasketById(id.toHexString());
       assert.strictEqual(response.length, 1);
       assert.deepStrictEqual(response[0]._id, id);
     });
 
     it('successfully adds item to basket', async () => {
       const addResponse = await addBasket();
-      const { insertedId: basketId } = addResponse;
+      const basketId = addResponse.insertedId.toString();
 
       const updateResponse = await updateBasketById(basketId, {
-        productId: 'abcdef123456',
+        productSlug: 'abcdef123456',
         quantity: 3,
         deliveryType: 'collection',
         deliveryDate: '2020-12-2'
@@ -139,7 +156,7 @@ describe('Database repository...', () => {
 
       const getResponse = await getBasketById(basketId);
       assert.strictEqual(getResponse.length, 1);
-      assert.strictEqual(getResponse[0].items[0].productId, 'abcdef123456');
+      assert.strictEqual(getResponse[0].items[0].productSlug, 'abcdef123456');
       assert.strictEqual(getResponse[0].items[0].quantity, 3);
       assert.strictEqual(getResponse[0].items[0].deliveryType, 'collection');
       assert.strictEqual(getResponse[0].items[0].deliveryDate, '2020-12-2');
@@ -147,9 +164,9 @@ describe('Database repository...', () => {
 
     it('successfully removes item from basket', async () => {
       const addResponse = await addBasket();
-      const { insertedId: basketId } = addResponse;
+      const basketId = addResponse.insertedId.toHexString();
       await updateBasketById(basketId, {
-        productId: 'abcdef123456',
+        productSlug: 'abcdef123456',
         quantity: 5,
         deliveryType: 'collection',
         deliveryDate: '2020-12-2'
@@ -160,7 +177,7 @@ describe('Database repository...', () => {
       assert.strictEqual(checkResponse[0].items[0].quantity, 5);
 
       const removeResponse = await removeItemFromBasket(basketId, {
-        productId: 'abcdef123456',
+        productSlug: 'abcdef123456',
         deliveryType: 'collection',
         deliveryDate: '2020-12-2'
       });
@@ -173,20 +190,20 @@ describe('Database repository...', () => {
 
     it('successfully updates quantity of item already in basket', async () => {
       const addResponse = await addBasket();
-      const { insertedId: basketId } = addResponse;
+      const basketId = addResponse.insertedId.toHexString();
       await updateBasketById(basketId, {
-        productId: 'abcdef123456',
+        productSlug: 'abcdef123456',
         deliveryType: 'collection',
         deliveryDate: '2020-12-2',
         quantity: 3
       });
       await removeItemFromBasket(basketId, {
-        productId: 'abcdef123456',
+        productSlug: 'abcdef123456',
         deliveryType: 'collection',
         deliveryDate: '2020-12-2'
       });
       await updateBasketById(basketId, {
-        productId: 'abcdef123456',
+        productSlug: 'abcdef123456',
         deliveryType: 'collection',
         deliveryDate: '2020-12-2',
         quantity: 6
@@ -199,7 +216,7 @@ describe('Database repository...', () => {
 
     it('successfully removes basket', async () => {
       const addResponse = await addBasket();
-      const { insertedId: id } = addResponse;
+      const id = addResponse.insertedId.toHexString();
       let numBaskets = await count('baskets');
       assert.strictEqual(numBaskets, 1);
 
@@ -211,10 +228,10 @@ describe('Database repository...', () => {
 
     it('successfully cleans up old baskets', async () => {
       await getCursor('baskets').insertOne({
-        _id: ObjectId('123456780000000000000000')
+        _id: new ObjectId('123456780000000000000000')
       });
       const addResponse = await addBasket();
-      const { insertedId: id } = addResponse;
+      const id = addResponse.insertedId.toHexString();
       let numEntries = await count('baskets');
       assert.strictEqual(numEntries, 2);
 
@@ -252,7 +269,7 @@ describe('Database repository...', () => {
     it('successfully gets order', async () => {
       const order = orders[0];
       const addResponse = await addOrder(order);
-      const { insertedId } = addResponse;
+      const insertedId = addResponse.insertedId.toHexString();
 
       const getResponse = await getOrderById(insertedId);
       assert.strictEqual(getResponse.length, 1);
@@ -262,7 +279,7 @@ describe('Database repository...', () => {
     it('successfully updates an order', async () => {
       const order = orders[0];
       const addResponse = await addOrder(order);
-      const { insertedId } = addResponse;
+      const insertedId = addResponse.insertedId.toHexString();
 
       const response = await updateOrder(insertedId, {
         $set: {
@@ -279,7 +296,7 @@ describe('Database repository...', () => {
     it('successfully removes an order', async () => {
       const order = orders[0];
       const addResponse = await addOrder(order);
-      const { insertedId } = addResponse;
+      const insertedId = addResponse.insertedId.toHexString();
 
       let numOrders = await count('orders');
       assert.strictEqual(numOrders, 1);
@@ -295,20 +312,22 @@ describe('Database repository...', () => {
       const order = orders[0];
       const payment = swishPayments[0];
       const addResponse = await addOrder(order);
-      const { insertedId } = addResponse;
+      const insertedId = addResponse.insertedId.toHexString();
 
       const response = await updateSwishPayment(payment);
       assert.strictEqual(response.modifiedCount, 1);
 
       const getResponse = await getOrderById(insertedId);
       assert.strictEqual(getResponse.length, 1);
-      assert.deepStrictEqual(getResponse[0].payment.swish, payment);
+      assert.deepStrictEqual(getResponse[0].payment.method === 'swish' && getResponse[0].payment.swish, payment);
     });
 
     it('successfully checks Swish status', async () => {
       await addOrder(orders[1]);
 
-      const { id: swishId } = orders[1].payment.swish;
+      const swishId = orders[1].payment.method === 'swish'
+        ? orders[1].payment.swish.id
+        : '';
       const firstResponse = await getSwishStatus(swishId);
       assert.strictEqual(firstResponse.length, 1);
       assert(!firstResponse[0].status);

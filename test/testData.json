@@ -50,12 +50,12 @@
     "items": [{
       "deliveryType": "delivery",
       "deliveryDate": "2020-12-11-12:00-15:00",
-      "slug": "whisk-christmas-hamper",
+      "productSlug": "whisk-christmas-hamper",
       "quantity": 1
     }, {
       "deliveryType": "delivery",
       "deliveryDate": "2020-12-18-12:00-15:00",
-      "slug": "whisk-christmas-hamper",
+      "productSlug": "whisk-christmas-hamper",
       "quantity": 2
     }],
     "delivery": {
@@ -89,6 +89,8 @@
       "totalPrice": 90000 },
     "payment": {
       "method": "swish",
+      "status": "PAID",
+      "refunds": [],
       "swish": {
         "id": "834AA1CE6D784D309CCB97D2D3EE7307"
       },

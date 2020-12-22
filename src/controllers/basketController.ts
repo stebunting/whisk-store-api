@@ -161,11 +161,13 @@ async function getBasket(basketId: string): Promise<Basket> {
     items = await getItems(basket.items);
   } catch (error) {
     log.error('Could not get all products from basket', { metadata: { tag, error, basketId } });
+    throw error;
   }
   const delivery = createDelivery(basket, items);
   const statement = getStatement(items, delivery);
 
   return {
+    ...basket,
     basketId: basket._id.toString(),
     items,
     delivery,
@@ -178,7 +180,7 @@ async function createBasket(): Promise<string> {
   cleanupBaskets(7);
 
   const basket = await addBasket();
-  return basket.insertedId.toString();
+  return basket.insertedId.toHexString();
 }
 
 // Method to get a basket

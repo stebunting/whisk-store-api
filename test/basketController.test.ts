@@ -1,29 +1,66 @@
+// Requirements
+import assert from 'assert';
+import sinon, { SinonStub } from 'sinon';
+import rewire from 'rewire';
+import Debug from 'debug';
+
+// Types
+import {
+  DeleteWriteOpResultObject,
+  InsertOneWriteOpResult,
+  ObjectId,
+  UpdateWriteOpResult
+} from 'mongodb';
+
+// Controllers
+import * as db from '../src/controllers/dbController';
+import {
+  getBasket,
+  apiGetBasket,
+  apiCreateBasket,
+  updateBasket,
+  updateZoneBasket,
+  removeFromBasket,
+  apiDeleteBasket
+} from '../src/controllers/basketController';
+
+// Dependencies
+import * as mockObjects from './mockObjects';
+import { Basket, DbBasket } from '../src/types/Basket';
+import { Product } from '../src/types/Product';
+
 // Page Tag
 const tag = 'store-api:basketController.test';
+const debug = Debug(tag);
 
-// Requirements
-const assert = require('assert').strict;
-const sinon = require('sinon');
-const rewire = require('rewire');
-const debug = require('debug')(tag);
-const db = require('../src/controllers/dbController');
-const mockObjects = require('./mockObjects');
 const testData = require('./testData.json');
 
 describe('Basket Calls...', () => {
-  let basketController;
-  let cleanUpBasketsStub;
-  let createBasketStub;
-  let getBasketByIdStub;
-  let getProductBySlugStub;
-  let removeItemFromBasketStub;
-  let updateBasketByIdStub;
-  let updateBasketZoneStub;
-  let removeBasketByIdStub;
-  let req;
-  let res;
-  let baskets;
-  let products;
+  let basketController: any;
+  let cleanUpBasketsStub: SinonStub<[days: number], Promise<DeleteWriteOpResultObject>>;
+  let addBasketStub: SinonStub<[], Promise<InsertOneWriteOpResult<DbBasket>>>;
+  let getBasketByIdStub: SinonStub<[id: string], Promise<Array<DbBasket>>>;
+  let getProductBySlugStub: SinonStub<[slug: string], Promise<Array<Product>>>;
+  let removeItemFromBasketStub: SinonStub<
+    [basketId: string,
+    payload: db.UpdateBasketPayload],
+    Promise<UpdateWriteOpResult>
+  >;
+  let updateBasketByIdStub: SinonStub<
+    [basketId: string,
+    payload: db.UpdateBasketPayload],
+    Promise<UpdateWriteOpResult>
+  >;
+  let updateBasketZoneStub: SinonStub<
+    [basketId: string,
+    location: db.UpdateBasketLocation],
+    Promise<UpdateWriteOpResult>
+  >;
+  let removeBasketByIdStub: SinonStub<[id: string], Promise<DeleteWriteOpResultObject>>;
+  let req: mockObjects.MockRequest;
+  let res: mockObjects.MockResponse;
+  let baskets: Array<Basket>;
+  let products: Array<Product>;
 
   const setUpStubs = () => {
     baskets = testData.baskets;
@@ -37,7 +74,7 @@ describe('Basket Calls...', () => {
   before(() => {
     // Stubs
     cleanUpBasketsStub = sinon.stub(db, 'cleanupBaskets');
-    createBasketStub = sinon.stub(db, 'addBasket');
+    addBasketStub = sinon.stub(db, 'addBasket');
     getBasketByIdStub = sinon.stub(db, 'getBasketById');
     getProductBySlugStub = sinon.stub(db, 'getProductBySlug');
     removeItemFromBasketStub = sinon.stub(db, 'removeItemFromBasket');
@@ -57,7 +94,7 @@ describe('Basket Calls...', () => {
 
     it('returns no baskets with invalid id', async () => {
       getBasketByIdStub.resolves([]);
-      await assert.rejects(basketController.getBasket(req, res));
+      await assert.rejects(getBasket('basketId'));
 
       assert(getBasketByIdStub.calledOnce);
       assert.strictEqual(getProductBySlugStub.callCount, 0);
@@ -67,7 +104,7 @@ describe('Basket Calls...', () => {
       getBasketByIdStub.resolves([baskets[1]]);
       getProductBySlugStub.resolves([]);
 
-      await assert.rejects(basketController.getBasket('fakeBasketId'));
+      await assert.rejects(getBasket('fakeBasketId'));
 
       assert(getBasketByIdStub.calledOnce);
       assert(getBasketByIdStub.calledWith('fakeBasketId'));
@@ -78,11 +115,11 @@ describe('Basket Calls...', () => {
       getBasketByIdStub.resolves([baskets[1]]);
       getProductBySlugStub.resolves([product]);
 
-      const basket = await basketController.getBasket('fakeBasketId');
+      const basket = await getBasket('fakeBasketId');
       assert(getBasketByIdStub.calledOnce);
       assert(getBasketByIdStub.calledWith('fakeBasketId'));
       assert(getProductBySlugStub.calledTwice);
-      assert(getProductBySlugStub.alwaysCalledWith(baskets[1].slug));
+      assert(getProductBySlugStub.alwaysCalledWith(baskets[1].items[0].productSlug));
 
       // Assert Basket Id
       assert('basketId' in basket);
@@ -96,8 +133,8 @@ describe('Basket Calls...', () => {
         assert.strictEqual(typeof item.deliveryType, 'string');
         assert('deliveryDate' in item);
         assert.strictEqual(typeof item.deliveryDate, 'string');
-        assert('slug' in item);
-        assert.strictEqual(typeof item.slug, 'string');
+        assert('productSlug' in item);
+        assert.strictEqual(typeof item.productSlug, 'string');
         assert('quantity' in item);
         assert.strictEqual(typeof item.quantity, 'number');
         assert('name' in item);
@@ -165,7 +202,7 @@ describe('Basket Calls...', () => {
       getBasketByIdStub.resolves([baskets[1]]);
       getProductBySlugStub.resolves([product]);
 
-      await basketController.apiGetBasket(req, res);
+      await apiGetBasket(req, res);
       assert(res.status.calledWith(200));
       assert(res.status.calledOnce);
       assert(res.json.calledOnce);
@@ -174,7 +211,7 @@ describe('Basket Calls...', () => {
     it('returns a new basket with invalid id supplied', async () => {
       req = mockObjects.request({ basketId: 'invalidBasketId' });
 
-      const getBasket = sinon
+      const getBasketStub = sinon
         .stub(basketController, 'getBasket')
         .onFirstCall()
         .rejects()
@@ -186,14 +223,14 @@ describe('Basket Calls...', () => {
         .stub()
         .resolves('newBasketId');
 
-      basketController.__set__('getBasket', getBasket);
+      basketController.__set__('getBasket', getBasketStub);
       basketController.__set__('createBasket', createBasket);
 
       await basketController.apiGetBasket(req, res);
-      assert(getBasket.calledTwice);
-      assert(getBasket.calledWith('invalidBasketId'));
-      assert(getBasket.firstCall.calledWith('invalidBasketId'));
-      assert(getBasket.secondCall.calledWith('newBasketId'));
+      assert(getBasketStub.calledTwice);
+      assert(getBasketStub.calledWith('invalidBasketId'));
+      assert(getBasketStub.firstCall.calledWith('invalidBasketId'));
+      assert(getBasketStub.secondCall.calledWith('newBasketId'));
 
       assert(res.status.calledWith(200));
       assert(res.status.calledOnce);
@@ -206,7 +243,7 @@ describe('Basket Calls...', () => {
         }
       }));
 
-      getBasket.restore();
+      getBasketStub.restore();
       basketController.__set__('createBasket', createBasketFn);
     });
   });
@@ -216,15 +253,16 @@ describe('Basket Calls...', () => {
     afterEach(resetStubs);
 
     it('creates a new basket', async () => {
-      createBasketStub.returns({ insertedId: 'abcdef123456' });
+      const insertedId = new ObjectId('abcdef123456abcdef123456');
+      addBasketStub.resolves({ insertedId } as InsertOneWriteOpResult<DbBasket>);
       const { next } = mockObjects;
-      await basketController.apiCreateBasket(req, res, next);
+      await apiCreateBasket(req, res, next);
 
       assert(cleanUpBasketsStub.calledOnce);
       assert(cleanUpBasketsStub.calledWith(7));
-      assert(createBasketStub.calledOnce);
+      assert(addBasketStub.calledOnce);
       assert(next.calledOnce);
-      assert.strictEqual(req.params.id, 'abcdef123456');
+      assert.strictEqual(req.params.id, 'abcdef123456abcdef123456');
     });
   });
 
@@ -233,24 +271,31 @@ describe('Basket Calls...', () => {
     afterEach(resetStubs);
 
     it('updates a basket', async () => {
+      const payload = {
+        productSlug: 'slug',
+        quantity: 2,
+        deliveryType: 'delivery',
+        deliveryDate: '2015-06-24',
+      };
+
       req = mockObjects.request(
         { basketId: 'updateBasketId' },
-        { payload: 'payload' }
+        payload
       );
       const { next } = mockObjects;
 
-      await basketController.updateBasket(req, res, next);
+      await updateBasket(req, res, next);
 
       assert(removeItemFromBasketStub.calledOnce);
       assert(removeItemFromBasketStub.calledWith(
         'updateBasketId',
-        { payload: 'payload' }
+        payload
       ));
 
       assert(updateBasketByIdStub.calledOnce);
       assert(updateBasketByIdStub.calledWith(
         'updateBasketId',
-        { payload: 'payload' }
+        payload
       ));
 
       assert(next.calledOnce);
@@ -258,18 +303,23 @@ describe('Basket Calls...', () => {
     });
 
     it('updates a basket zone', async () => {
+      const location = {
+        address: 'Fake Address',
+        zone: 2
+      };
+
       req = mockObjects.request(
         { basketId: 'updateBasketZoneId' },
-        { location: 'location' }
+        { location }
       );
       const { next } = mockObjects;
 
-      await basketController.updateZoneBasket(req, res, next);
+      await updateZoneBasket(req, res, next);
 
       assert(updateBasketZoneStub.calledOnce);
       assert(updateBasketZoneStub.calledWith(
         'updateBasketZoneId',
-        'location'
+        location
       ));
 
       assert(next.calledOnce);
@@ -277,18 +327,25 @@ describe('Basket Calls...', () => {
     });
 
     it('removes an item from the basket', async () => {
+      const payload = {
+        productSlug: 'slug',
+        quantity: 2,
+        deliveryType: 'delivery',
+        deliveryDate: '2015-06-24',
+      };
+
       req = mockObjects.request(
         { basketId: 'removeBasketId' },
-        { payload: 'payload' }
+        payload
       );
       const { next } = mockObjects;
 
-      await basketController.removeFromBasket(req, res, next);
+      await removeFromBasket(req, res, next);
 
       assert(removeItemFromBasketStub.calledOnce);
       assert(removeItemFromBasketStub.calledWith(
         'removeBasketId',
-        { payload: 'payload' }
+        payload
       ));
 
       assert(next.calledOnce);
@@ -299,7 +356,7 @@ describe('Basket Calls...', () => {
       req = mockObjects.request({ basketId: 'removeBasketId' });
       const { next } = mockObjects;
 
-      await basketController.apiDeleteBasket(req, res, next);
+      await apiDeleteBasket(req, res, next);
 
       assert(removeBasketByIdStub.calledOnce);
       assert(removeBasketByIdStub.calledWith('removeBasketId'));

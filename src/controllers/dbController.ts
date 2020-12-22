@@ -373,5 +373,7 @@ export {
   getSwishStatus,
   updateSwishPayment,
   updateSwishRefund,
-  getAdminUser
+  getAdminUser,
+  UpdateBasketPayload,
+  UpdateBasketLocation
 };

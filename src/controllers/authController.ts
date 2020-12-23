@@ -2,7 +2,7 @@
 import bcrypt from 'bcrypt';
 import log from 'winston';
 import Debug from 'debug';
-import { Request, Response, NextFunction } from 'express-serve-static-core';
+import { Request, Response, NextFunction } from 'express';
 
 // Controllers
 import { getAdminUser } from './dbController';

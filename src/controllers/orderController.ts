@@ -1,10 +1,12 @@
 // Requirements
 import Debug from 'debug';
-import { NextFunction, Request, Response } from 'express-serve-static-core';
+import { NextFunction, Request, Response } from 'express';
 
 // Types
+import { SwishPayload } from 'src/types/SwishPayload';
+import { SwishRefundPayload } from 'src/types/SwishRefundPayload';
 import { Order } from 'src/types/Order';
-import { Basket } from '../types/Basket';
+import { Basket } from 'src/types/Basket';
 import status from './orderStatuses';
 
 // Controllers
@@ -21,10 +23,6 @@ import {
   getOrderById
 } from './dbController';
 import { getBasket } from './basketController';
-
-// Types
-import { SwishRefundPayload } from 'src/types/SwishRefundPayload';
-import { SwishPayload } from 'src/types/SwishPayload';
 
 // Page Tag
 const tag = 'store-api:orderController';

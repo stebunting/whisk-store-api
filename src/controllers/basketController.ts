@@ -1,7 +1,7 @@
 // Requirements
 import log from 'winston';
 import Debug from 'debug';
-import { NextFunction, Request, Response } from 'express-serve-static-core';
+import { NextFunction, Request, Response } from 'express';
 
 // Controllers
 import {

@@ -1,10 +1,10 @@
 // Requirements
 import log from 'winston';
 import Debug from 'debug';
-import { Request, Response } from 'express-serve-static-core';
+import { Request, Response } from 'express';
 
 // Types
-import { Product } from '../types/Product';
+import { Product } from 'src/types/Product';
 
 // Controllers
 import { getProducts, getProductBySlug } from './dbController';

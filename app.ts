@@ -1,16 +1,12 @@
 // Requirements
-import express from 'express';
+import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import Debug from 'debug';
 import dotenv from 'dotenv';
-import { Request, Response } from 'express-serve-static-core';
-
-dotenv.config();
-
-import log from './src/config/logger';
 
 // Controllers
+import log from './src/config/logger';
 import { connect as dbConnect, disconnect as dbDisconnect } from './src/controllers/dbController';
 import { connect as emailConnect } from './src/controllers/emailController';
 import apiRouter from './src/routes/apiRoutes';
@@ -18,13 +14,14 @@ import apiRouter from './src/routes/apiRoutes';
 // File tag
 const tag = 'store-api';
 const debug = Debug(tag);
+dotenv.config();
 
 // App configuration
 const app = express();
 const port = process.env.PORT || 3000;
-// app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(bodyParser.json());
-// app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(cors());
 
 // Connect to MongoDB and SMTP Server
 dbConnect();

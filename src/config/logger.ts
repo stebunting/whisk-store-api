@@ -1,11 +1,13 @@
 // Requirements
 import winston from 'winston';
 import { MongoDB } from 'winston-mongodb';
+import dotenv from 'dotenv';
 import Debug from 'debug';
 
 // File tag
 const tag = 'store-api:logger';
 const debug = Debug(tag);
+dotenv.config();
 
 winston.add(new winston.transports.Console({
   level: 'info',

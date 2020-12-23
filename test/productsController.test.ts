@@ -11,7 +11,7 @@ import * as mockObjects from './mockObjects';
 const tag = 'store-api:productsController.test';
 const testData = require('./testData.json');
 
-describe.only('Product Calls...', () => {
+describe('Product Calls...', () => {
   let getProductsStub: SinonStub<
     [query?: { [key: string]: any; }],
     Promise<Array<Product>>

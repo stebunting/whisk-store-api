@@ -1,13 +1,18 @@
+// Requirements
+import assert from 'assert';
+
+// Types
+import { Order } from '../src/types/Order';
+
+// Controllers
+import { isConnected, connect, sendConfirmationEmail } from '../src/controllers/emailController';
+
 // Page Tag
 const tag = 'store-api:emailController.test';
-
-// Requirements
-const assert = require('assert').strict;
-const { isConnected, connect, sendConfirmationEmail } = require('../src/controllers/emailController');
 const testData = require('./testData.json');
 
 describe('E-Mailer...', () => {
-  let orders;
+  let orders: Array<Order>;
 
   const setUpTestData = () => {
     orders = testData.orders;
@@ -42,7 +47,7 @@ describe('E-Mailer...', () => {
 
     it('sends confirmation email', async () => {
       const order = orders[0];
-      const response = await sendConfirmationEmail(order, 'Monday');
+      const response = await sendConfirmationEmail(order);
       assert(response);
     });
   });

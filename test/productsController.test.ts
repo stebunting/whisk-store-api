@@ -1,25 +1,38 @@
+// Requirements
+import assert from 'assert';
+import sinon, { SinonStub } from 'sinon';
+
+// Controllers
+import * as db from '../src/controllers/dbController';
+import { Product } from '../src/types/Product';
+import * as mockObjects from './mockObjects';
+
 // Page Tag
 const tag = 'store-api:productsController.test';
-
-// Requirements
-const assert = require('assert').strict;
-const sinon = require('sinon');
-const db = require('../src/controllers/dbController');
-const mockObjects = require('./mockObjects');
 const testData = require('./testData.json');
 
-describe('Product Calls...', () => {
-  let getProductsStub;
-  let getProductBySlugStub;
-  let fetchProducts;
-  let fetchProduct;
-  let req;
-  let res;
-  let products;
+describe.only('Product Calls...', () => {
+  let getProductsStub: SinonStub<
+    [query?: { [key: string]: any; }],
+    Promise<Array<Product>>
+  >;
+  let getProductBySlugStub: SinonStub<
+    [slug: string],
+    Promise<Array<Product>>
+  >;
+  let fetchProducts: (
+    req: mockObjects.MockRequest, res: mockObjects.MockResponse
+  ) => Promise<Array<Product>>;
+  let fetchProduct: (
+    req: mockObjects.MockRequest, res: mockObjects.MockResponse
+  ) => Promise<Array<Product>>;
+  let req: mockObjects.MockRequest;
+  let res: mockObjects.MockResponse;
+  let products: Array<Product>;
 
   const setUpStubs = () => {
     products = testData.products;
-    getProductsStub.returns(products);
+    getProductsStub.resolves(products);
     req = mockObjects.request();
     res = mockObjects.response();
   };
@@ -58,7 +71,7 @@ describe('Product Calls...', () => {
 
     it('returns error when product list db call fails', async () => {
       getProductsStub.rejects();
-      assert.rejects(await fetchProducts(req, res));
+      await fetchProducts(req, res);
 
       assert(getProductsStub.calledOnce);
       assert(res.status.calledWith(500));
@@ -73,7 +86,7 @@ describe('Product Calls...', () => {
     afterEach(resetStubs);
 
     it('gets empty array with invalid slug', async () => {
-      getProductBySlugStub.returns([]);
+      getProductBySlugStub.resolves([]);
       req = mockObjects.request({ productSlug: 'invalidSlug' });
       await fetchProduct(req, res);
 
@@ -91,7 +104,7 @@ describe('Product Calls...', () => {
     it('returns error when product list db call fails', async () => {
       getProductBySlugStub.rejects();
       req = mockObjects.request({ productSlug: 'validSlug' });
-      assert.rejects(await fetchProduct(req, res));
+      await fetchProduct(req, res);
 
       assert(getProductBySlugStub.calledOnce);
       assert(res.status.calledWith(500));
@@ -101,7 +114,7 @@ describe('Product Calls...', () => {
     });
 
     it('gets product with valid id', async () => {
-      getProductBySlugStub.returns([products[0]]);
+      getProductBySlugStub.resolves([products[0]]);
       req = mockObjects.request({ productSlug: 'validSlug' });
       await fetchProduct(req, res);
 

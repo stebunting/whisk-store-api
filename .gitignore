@@ -4,4 +4,4 @@ node_modules
 db-backup
 mongobackup
 logs
-build
+dist

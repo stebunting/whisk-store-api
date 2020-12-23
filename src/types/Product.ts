@@ -34,7 +34,7 @@ interface DeliveryTypes {
   [key: string]: {
     dates: Array<Date>
   },
-  delivery?: {
+  delivery: {
     dates: Array<Date>,
     costs: {
       [zone: string]: {
@@ -45,7 +45,7 @@ interface DeliveryTypes {
     }
     maxZone: number
   },
-  collection?: {
+  collection: {
     dates: Array<Date>
   },
 }

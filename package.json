@@ -4,7 +4,10 @@
   "description": "Whisk.se Store API",
   "main": "app.js",
   "scripts": {
-    "start": "tsc",
+    "start": "npm run build",
+    "prebuild": "rm -rf ./dist",
+    "build": "tsc",
+    "postbuild": "cp package*.json ./dist",
     "dev": "nodemon --exec ts-node ./app.ts",
     "ngrok": "ngrok http 5000",
     "test": "DEBUG=store-api,store-api:* DEBUG_DEPTH=5 nyc mocha --require test/fixtures.cjs --require ts-node/register test/*"

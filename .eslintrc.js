@@ -20,6 +20,9 @@ module.exports = {
     '@typescript-eslint',
     'import'
   ],
+  ignorePatterns: [
+    'dist/**/*'
+  ],
   settings: {
     'import/parsers': {
       '@typescript-eslint/parser': ['.ts', '.tsx']
